@@ -92,6 +92,7 @@
 		8B15BBFB14578B96005F9802 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0420;
 				ORGANIZATIONNAME = "Universitetet i Oslo";
 			};
 			buildConfigurationList = 8B15BBFE14578B96005F9802 /* Build configuration list for PBXProject "sh142" */;
@@ -201,6 +202,7 @@
 				8B15BC1014578B97005F9802 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
