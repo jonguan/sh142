@@ -7,19 +7,31 @@
 //
 
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
 
 #ifndef sh142_definitions_h
 #define sh142_definitions_h
 
 #define CMD_LEN 128 //TODO: This value could also be stored in the config file
 
+/* VARIABLES */
 static char* currentPath;
+static char* dataPath;
+static char* execPath;
 static char command[CMD_LEN];
 static int commandIdx;
 static char* promptSignature; //TODO: Fetch from config file if there
 
-void printPrompt();
-void init();
+/* PROTOTYPES */
+void printPrompt(void);
+void init(void);
+int cmdInterpreter (char* cmd);
+int cmdInterpreterInternal (char* cmd, char* end);
+int cmdInterpreterExternal (char* cmd, char* end);
+int setExecPath(char* cmd, char* end);
+int setDataPath(char* cmd, char* end);
+int setPath(char* cmd, char* end, char* p);
 
 
 
