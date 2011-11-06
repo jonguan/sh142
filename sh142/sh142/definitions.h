@@ -20,6 +20,10 @@ static char* promptSignature; //TODO: Fetch from config file if there
 
 void printPrompt();
 void init();
+void readConfigFile(void);
+void loadConfig(char str1[], int c1, char str2[], int c2);
+
+FILE *configFile;
 
 
 
