@@ -112,8 +112,7 @@ int main (int argc, const char * argv[])
         char c = fgetc(stdin);
         if (++commandIdx >= CMD_LEN) {
             error("Command buffer is full.");
-            command[0] = '\0';
-            commandIdx = -1;
+            resetCommandBuffer();
             printPrompt();
             continue;
         }
@@ -125,7 +124,7 @@ int main (int argc, const char * argv[])
             
             if (cmdInterpreter(command) == -1) break;
             
-            commandIdx = -1; //Resets command array
+            resetCommandBuffer();
             printPrompt();
         } else {
             //TODO: Add case for "up arrow" pressed (get previous command entered)
@@ -133,6 +132,11 @@ int main (int argc, const char * argv[])
     }
     
     return 0;
+}
+
+void resetCommandBuffer() {
+    commandIdx = -1;
+    for (char* c = command; *c != '\0'; c++) *c = '\0';
 }
 
 /*
@@ -185,6 +189,18 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
 }
 
 int cmdInterpreterExternal (char* cmd, char* end) {
+    char *ptr;
+    char *startPtr = execPath;
+    for (ptr = execPath; *ptr != '\0'; ptr++) {
+        if (*ptr == ':') {
+            *ptr = '\0';
+            printf("%s\n", startPtr); //TODO: Match cmd to path contents
+            startPtr = ptr + 1;
+            *ptr = ':';
+        }
+    }
+    printf("%s\n", startPtr);
+    
     return 1;
 }
 
