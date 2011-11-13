@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include "definitions.h"
+#include "pipe.h"
 
 void error(char* c) {
     printf("Error: %s\n", c);
@@ -33,6 +34,8 @@ void init() {
     
     printPrompt();
 }
+
+#pragma mark - Configuration methods
 
 void readConfigFile()
 {
@@ -105,6 +108,8 @@ void loadConfig(char str1[], int c1, char str2[], int c2) {
     }*/
 }
 
+
+#pragma mark - Main Method
 int main (int argc, const char * argv[])
 {
     init();
@@ -139,6 +144,8 @@ void resetCommandBuffer() {
     for (char* c = command; *c != '\0'; c++) *c = '\0';
 }
 
+
+#pragma mark - Command Interpreter methods
 /*
  Checks for internal commands first, then external (from data path) later.
  */
@@ -154,7 +161,7 @@ int cmdInterpreter (char* cmd) {
     if (i == -1) return -1; //Special case: exit
     else if (i != 1); //Command was handled internally
     else if (!cmdInterpreterExternal(cmd, c)); //Command was handled externally
-    else { //Command was not reckognized
+    else { //Command was not recognized
         printf("Unknown command: '%s'\n", cmd);
         return 1;
     }
@@ -189,6 +196,8 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
 }
 
 int cmdInterpreterExternal (char* cmd, char* end) {
+    
+    /*
     char *ptr;
     char *startPtr = execPath;
     for (ptr = execPath; *ptr != '\0'; ptr++) {
@@ -200,8 +209,14 @@ int cmdInterpreterExternal (char* cmd, char* end) {
         }
     }
     printf("%s\n", startPtr);
-    
     return 1;
+     */
+    int i = runExternalCommand(cmd);
+    if (i == 0) {
+        return 1;
+    }
+    return i;
+
 }
 
 int setExecPath(char* cmd, char* end) { //TODO: Save to config file

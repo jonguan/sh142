@@ -6,11 +6,14 @@
 //  Copyright 2011 Universitetet i Oslo. All rights reserved.
 //
 
-#include <stdio.h>
-#include <unistd.h>
+#include <stdio.h> /* printf, stderr, fprintf, popen, pclose, FILE */
+#include <unistd.h> /* _exit, fork */
 #include <string.h>
-#include <stdlib.h>
+#include <stdlib.h> /* exit */
 #include <sys/stat.h>
+#include <errno.h> /* errno */
+#include <pthread.h>
+
 
 #ifndef sh142_definitions_h
 #define sh142_definitions_h
@@ -36,6 +39,7 @@ void resetCommandBuffer(void);
 int cmdInterpreter (char* cmd);
 int cmdInterpreterInternal (char* cmd, char* mid, char* end);
 int cmdInterpreterExternal (char* cmd, char* end);
+
 
 int setExecPath(char* cmd, char* end);
 int setDataPath(char* cmd, char* end);
