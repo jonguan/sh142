@@ -211,11 +211,7 @@ int cmdInterpreterExternal (char* cmd, char* end) {
     printf("%s\n", startPtr);
     return 1;
      */
-    int i = runExternalCommand(cmd);
-    if (i == 0) {
-        return 1;
-    }
-    return i;
+    return runExternalCommand(cmd);
 
 }
 
