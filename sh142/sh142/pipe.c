@@ -13,8 +13,8 @@
 int runExternalCommand(char *command)
 {
     FILE *ps_pipe;
-    FILE *grep_pipe;
-    FILE *header_pipe;
+    //FILE *grep_pipe;
+    //FILE *header_pipe;
 
     long bytes_read;
     size_t nbytes = 100;
@@ -22,11 +22,11 @@ int runExternalCommand(char *command)
     
     /* Open our two pipes */
     ps_pipe = popen (command, "r");
-    grep_pipe = popen ("grep 0", "w");
-    header_pipe = popen ("grep UID", "w");
+   // grep_pipe = popen ("grep 0", "w");
+    // header_pipe = popen ("grep UID", "w");
     
     /* Check that pipes are non-null, therefore open */
-    if ((!ps_pipe) || (!grep_pipe) || (!header_pipe))
+    if ((!ps_pipe) /*|| (!grep_pipe) || (!header_pipe)*/)
     {
         fprintf (stderr,
                  "One or both pipes failed.\n");
@@ -43,11 +43,13 @@ int runExternalCommand(char *command)
         fprintf (stderr,
                  "Could not run 'ps', or other error.\n");
     }
-    fprintf (header_pipe, "%s\n", my_string);
+    //fprintf (header_pipe, "%s\n", my_string);
     /* Send output of 'ps -A' to 'grep init', with two newlines */
-    fprintf (grep_pipe, "%s\n\n", my_string);
+    //fprintf (grep_pipe, "%s\n\n", my_string);
+    printf("%s\n\n", my_string);
     
     /* Close grep_pipe, cehcking for errors */
+    /*
     if (pclose (header_pipe) !=0)
       fprintf (stderr, "could not run 'grep UID', or other error\n");
 
@@ -55,7 +57,7 @@ int runExternalCommand(char *command)
     {
         fprintf (stderr,
                  "Could not run 'grep 0', or other error.\n");
-    }
+    }*/
     
     /* Exit! */
     return 0;
