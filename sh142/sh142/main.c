@@ -8,6 +8,11 @@
 
 #include <stdio.h>
 #include "definitions.h"
+#include "pipe.h"
+
+void error(char* c) {
+    printf("Error: %s\n", c);
+}
 
 void printPrompt() {
     char *pathPtr = getcwd(currentPath, 1024);
@@ -22,14 +27,15 @@ void init() {
     dataPath = (char*) calloc(1024, sizeof(char));
     execPath = (char*) calloc(1024, sizeof(char));
     promptSignature = (char*) calloc(16, sizeof(char));
+    *promptSignature = '\0';
     
     readConfigFile();
-
-
-    promptSignature = "§";
-
+    if (*promptSignature == '\0') promptSignature = "§";
+    
     printPrompt();
 }
+
+#pragma mark - Configuration methods
 
 void readConfigFile()
 {
@@ -102,15 +108,16 @@ void loadConfig(char str1[], int c1, char str2[], int c2) {
     }*/
 }
 
+
+#pragma mark - Main Method
 int main (int argc, const char * argv[])
 {
     init();
     while (1) {
         char c = fgetc(stdin);
         if (++commandIdx >= CMD_LEN) {
-            printf("Error: Command buffer is full.\n");
-            command[0] = '\0';
-            commandIdx = -1;
+            error("Command buffer is full.");
+            resetCommandBuffer();
             printPrompt();
             continue;
         }
@@ -120,92 +127,146 @@ int main (int argc, const char * argv[])
         if (command[commandIdx] == '\n') { //The whole command is stored in command array
             command[commandIdx] = '\0';
             
-            printf("You entered: '%s'\n", command); //This should be replaced with a call to command interpreter
-            cmdInterpreter(command);
+            if (cmdInterpreter(command) == -1) break;
             
-            commandIdx = -1; //Resets command array
+            resetCommandBuffer();
             printPrompt();
         } else {
-            
+            //TODO: Add case for "up arrow" pressed (get previous command entered)
         }
     }
     
     return 0;
 }
 
+void resetCommandBuffer() {
+    commandIdx = -1;
+    for (char* c = command; *c != '\0'; c++) *c = '\0';
+}
+
+
+#pragma mark - Command Interpreter methods
 /*
  Checks for internal commands first, then external (from data path) later.
  */
 int cmdInterpreter (char* cmd) {
     char* c;
-    for (c = cmd; *c != '\0'; c++);
-    if (cmdInterpreterInternal(cmd, c)) return 1;
-    else if (cmdInterpreterExternal(cmd, c)) return 1;
-    else {
-        printf("Unknown command: '%s'\n", cmd);
-        return 0;
+    char* d = '\0';
+    for (c = cmd; *c != '\0'; c++) {
+        if (d == '\0' && *c == ' ') d = c;
     }
+    if (d == '\0') d = c;
+    int i = cmdInterpreterInternal(cmd, d, c);
+    
+    if (i == -1) return -1; //Special case: exit
+    else if (i != 1); //Command was handled internally
+    else if (!cmdInterpreterExternal(cmd, c)); //Command was handled externally
+    else { //Command was not recognized
+        printf("Unknown command: '%s'\n", cmd);
+        return 1;
+    }
+    return 0;
 }
 
 /*
- Add new internal commands here.
- If the command takes agruments, remember to check if
- range == length of command name (i.e range == 2 for cd or ls).
+ Attempts to apply a command internally.
+ (Add new internal commands in this method.)
  
- Returns 1 if command was processed, else 0.
+ cmd points to first char in command.
+ mid points to the first char after the command name.
+ end points to the last char of the command.
+ 
+ Returns 0 if command was processed, else 1.
  */
-int cmdInterpreterInternal (char* cmd, char* end) {
-    long range = end - cmd;
-    if (!strncmp(cmd, "PATH=", 5)) {
-        if (!setExecPath(cmd, end))
-            printf("Error: Failed to set executable path");
+int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
+    long range = mid - cmd;
+    if (end == cmd) {
+    } else if (range == 4 && !strncmp(cmd, "exit", 4)) {
+        return -1;
+    } else if (!strncmp(cmd, "PATH=", 5)) {
+        setExecPath(cmd + 5, end);
     } else if (!strncmp(cmd, "DATA=", 5)) {
-        if (!setDataPath(cmd, end))
-            printf("Error: Failed to set data path");
-    } else if (range == 8 && !strncmp(cmd, "example1", range)) { //template example
-        printf("echo 1\n");
-        return 1;
-    } else if (range == 8 && !strncmp(cmd, "example2", range)) { //template example
-        printf("echo 2\n");
-        return 1;
-    } else if (range == 8 && !strncmp(cmd, "example3", range)) { //template example
-        printf("echo 3\n");
-        return 1;
-    } else return 0; //Command is not reckognized as internal
-    
-    return 1; //Command was processed as internal
+        setDataPath(cmd + 5, end);
+    } else if (range == 5 && !strncmp(cmd, "test1", range)) { //template example
+            printf("echo 1\n");
+    } else if (range == 5 && !strncmp(cmd, "test2", range)) { //template example
+            printf("echo 2 with parameters: '%s'.\n", mid + 1);
+    } else return 1;
+    return 0; //Command was processed as internal
 }
 
 int cmdInterpreterExternal (char* cmd, char* end) {
-    return 0;
+    
+    /*
+    char *ptr;
+    char *startPtr = execPath;
+    for (ptr = execPath; *ptr != '\0'; ptr++) {
+        if (*ptr == ':') {
+            *ptr = '\0';
+            printf("%s\n", startPtr); //TODO: Match cmd to path contents
+            startPtr = ptr + 1;
+            *ptr = ':';
+        }
+    }
+    printf("%s\n", startPtr);
+    return 1;
+     */
+    return runExternalCommand(cmd);
+
 }
 
 int setExecPath(char* cmd, char* end) { //TODO: Save to config file
-    if (setPath(cmd, end, execPath)) {
+    if (!setPath(cmd, end, execPath)) {
         printf("Executable path set as '%s'\n", execPath);
+        return 0;
+    } else {
+        error("Executable path was not set.");
         return 1;
     }
-    return 0;
 }
 
 int setDataPath(char* cmd, char* end) { //TODO: Save to config file
-    if (setPath(cmd, end, dataPath)) {
+    if (!setPath(cmd, end, dataPath)) {
         printf("Data path set as '%s'\n", dataPath);
+        return 0;
+    } else {
+        error("Datapath was not set.");
         return 1;
     }
-    return 0;
 }
 
 int setPath(char* cmd, char* end, char* p) {
-    if (end - cmd > 1024) {
-        return 0;
-    }
+    if (end - cmd > 1024 || validatePaths(cmd)) return 1;
     
     char* pathPtr = p;
-    for (char* c = cmd + 5; c != end; c++) {
+    for (char* c = cmd; c != end; c++) {
         *pathPtr = *c;
         pathPtr++;
     }
     *pathPtr = '\0';
-    return 1;
+    return 0;
 }
+
+int validatePaths(char* pathList) {
+    int foundErrors = 0;
+    char* ptr;
+    char* ptrStart = pathList;
+    struct stat s;
+    for (ptr = pathList; *ptr != '\0'; ptr++) {
+        if (*ptr == ':') {
+            *ptr = '\0'; //Temporarily cuts array short
+            if(stat(ptrStart, &s)) {
+                printf("Error: Path '%s' does not exist.\n", ptrStart);
+                foundErrors++;
+            }
+            *ptr = ':';
+            ptrStart = ptr + 1;
+        }
+    }
+    if(stat(ptrStart, &s)) {
+        printf("Error: Path '%s' does not exist.\n", ptrStart);
+        foundErrors++;
+    }
+    return foundErrors;
+}
+
