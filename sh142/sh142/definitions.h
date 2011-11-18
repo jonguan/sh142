@@ -29,8 +29,7 @@
 #define WAITING_INPUT 'W'
 #define EXIT (-1)
 #define UNINITIALIZED (-2)
-#define AND 10
-#define OR AND+1
+#define SUCCESS 0
 
 /* VARIABLES */
 static char* currentPath;
