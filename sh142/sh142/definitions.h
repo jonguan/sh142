@@ -20,18 +20,22 @@
 
 #define CMD_LEN 128 //TODO: This value could also be stored in the config file
 #define NUM_REMEMEBERED_CMDS 10
+#define EXIT (-1)
+#define UNINITIALIZED (-2)
 
 /* VARIABLES */
 static char* currentPath;
 static char* dataPath;
 static char* execPath;
-static char command[CMD_LEN];
-static int commandIdx;
+static char command[CMD_LEN];   //User input string after we initialize (without \n)
+static int commandIdx;          //Pointer to index inside string command
 static char* promptSignature;
 FILE *configFile;
-static int exitStatus[NUM_REMEMEBERED_CMDS];
+static int exitStatusArray[NUM_REMEMEBERED_CMDS];
+static int commandNumber; //Points to number of executed command
 
 /* PROTOTYPES */
+int parseInput(char *inputCommand);
 void error(char* c);
 void printPrompt(void);
 void init(void);
