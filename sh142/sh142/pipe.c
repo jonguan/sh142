@@ -8,21 +8,29 @@
 
 
 #include "pipe.h"
+#include <string.h>
 
-
+//Command is full command input of from the buffer
 int runExternalCommand(char *command)
 {
+    char *cmd = strtok(command, "for");
+        
+    return runSubCommand(cmd);
+        
+}
+
+int runSubCommand(char*subCommand){
     FILE *ps_pipe;
     //FILE *grep_pipe;
     //FILE *header_pipe;
-
+    
     long bytes_read;
     size_t nbytes = 100;
     char *my_string;
     
     /* Open our two pipes */
-    ps_pipe = popen (command, "r");
-   // grep_pipe = popen ("grep 0", "w");
+    ps_pipe = popen (subCommand, "r");
+    // grep_pipe = popen ("grep 0", "w");
     // header_pipe = popen ("grep UID", "w");
     
     /* Check that pipes are non-null, therefore open */
@@ -50,15 +58,17 @@ int runExternalCommand(char *command)
     
     /* Close grep_pipe, cehcking for errors */
     /*
-    if (pclose (header_pipe) !=0)
-      fprintf (stderr, "could not run 'grep UID', or other error\n");
-
-    if (pclose (grep_pipe) != 0)
-    {
-        fprintf (stderr,
-                 "Could not run 'grep 0', or other error.\n");
-    }*/
+     if (pclose (header_pipe) !=0)
+     fprintf (stderr, "could not run 'grep UID', or other error\n");
+     
+     if (pclose (grep_pipe) != 0)
+     {
+     fprintf (stderr,
+     "Could not run 'grep 0', or other error.\n");
+     }*/
     
     /* Exit! */
+    free(my_string);
     return 0;
+
 }

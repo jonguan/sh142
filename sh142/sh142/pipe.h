@@ -12,6 +12,6 @@
 #ifndef sh142_pipe_h
 #define sh142_pipe_h
 int runExternalCommand(char*);
-
+int runSubCommand(char*subCommand);
 
 #endif
