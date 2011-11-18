@@ -65,6 +65,8 @@
 				F4F35394146F412400979ACA /* pipe.c */,
 				B8086E72145E0C460004F723 /* definitions.h */,
 				F4F35397146F4F0700979ACA /* pipe.h */,
+				8BF8C7791475F117000E2DD9 /* jobs.c */,
+				8B5933E614762C9B00E16946 /* jobs.h */,
 			);
 			path = sh142;
 			sourceTree = "<group>";
@@ -122,6 +124,7 @@
 			files = (
 				8B15BC0914578B97005F9802 /* main.c in Sources */,
 				F4F35395146F412400979ACA /* pipe.c in Sources */,
+				8BF8C77A1475F117000E2DD9 /* jobs.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

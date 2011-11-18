@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <errno.h> /* errno */
 #include <pthread.h>
+#include <termios.h>
 
 
 #ifndef sh142_definitions_h
@@ -20,18 +21,36 @@
 
 #define CMD_LEN 128 //TODO: This value could also be stored in the config file
 #define NUM_REMEMEBERED_CMDS 10
+#define TRUE 1
+#define FALSE !TRUE
+#define FOREGROUND 'F'
+#define BACKGROUND 'B'
+#define SUSPENDED 'S'
+#define WAITING_INPUT 'W'
+#define EXIT (-1)
+#define UNINITIALIZED (-2)
+#define AND 10
+#define OR AND+1
 
 /* VARIABLES */
 static char* currentPath;
 static char* dataPath;
 static char* execPath;
-static char command[CMD_LEN];
-static int commandIdx;
+static char command[CMD_LEN];   //User input string after we initialize (without \n)
+static int commandIdx;          //Pointer to index inside string command
 static char* promptSignature;
 FILE *configFile;
-static int exitStatus[NUM_REMEMEBERED_CMDS];
+static int exitStatusArray[NUM_REMEMEBERED_CMDS];
+static int commandNumber; //Points to number of executed command
+
+//static pid_t SHELL_PID;
+//static pid_t SHELL_PGID;
+//static int SHELL_TERMINAL;
+//static int SHELL_IS_INTERACTIVE;
+//struct termios SHELL_TMODES;
 
 /* PROTOTYPES */
+int parseInput(char *inputCommand);
 void error(char* c);
 void printPrompt(void);
 void init(void);
@@ -50,16 +69,8 @@ int setDataPath(char* cmd, char* end);
 int setPath(char* cmd, char* end, char* p);
 int validatePaths(char* pathList);
 
-static int numActiveJobs = 0;
+void launchJob(char *command[]);
 
-typedef struct job {
-    int id;
-    char *name;
-    pid_t pid;
-    pid_t pgid;
-    int status;
-    char *descriptor;
-    struct job *next;
-} t_job;
+
 
 #endif
