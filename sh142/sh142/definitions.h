@@ -19,6 +19,7 @@
 #define sh142_definitions_h
 
 #define CMD_LEN 128 //TODO: This value could also be stored in the config file
+#define NUM_REMEMEBERED_CMDS 10
 
 /* VARIABLES */
 static char* currentPath;
@@ -28,6 +29,7 @@ static char command[CMD_LEN];
 static int commandIdx;
 static char* promptSignature;
 FILE *configFile;
+static int exitStatus[NUM_REMEMEBERED_CMDS];
 
 /* PROTOTYPES */
 void error(char* c);
@@ -45,5 +47,17 @@ int setExecPath(char* cmd, char* end);
 int setDataPath(char* cmd, char* end);
 int setPath(char* cmd, char* end, char* p);
 int validatePaths(char* pathList);
+
+static int numActiveJobs = 0;
+
+typedef struct job {
+    int id;
+    char *name;
+    pid_t pid;
+    pid_t pgid;
+    int status;
+    char *descriptor;
+    struct job *next;
+} t_job;
 
 #endif
