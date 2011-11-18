@@ -37,6 +37,8 @@ void printPrompt(void);
 void init(void);
 void readConfigFile(void);
 void loadConfig(char str1[], int c1, char str2[], int c2);
+int generateConfig(void);
+int putLnToFile(FILE* dest, char* key, char* val);
 void resetCommandBuffer(void);
 int cmdInterpreter (char* cmd);
 int cmdInterpreterInternal (char* cmd, char* mid, char* end);

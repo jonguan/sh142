@@ -108,6 +108,35 @@ void loadConfig(char str1[], int c1, char str2[], int c2) {
     }*/
 }
 
+int generateConfig() {
+    configFile = fopen(".sh142", "w");
+    int loop = 1, status;
+    for (int i = 0; loop; i++) {
+        switch (i) {
+            case 0: status = putLnToFile(configFile, "DataPath", dataPath); break;
+            case 1: status = putLnToFile(configFile, "ExecPath", execPath); break;
+            case 2: status = putLnToFile(configFile, "PromptSignature", promptSignature); break;
+                
+            default:loop = 0; break;
+        }
+        if (status) {
+            return 1;
+        }
+    }
+    fclose(configFile);
+    return 0;
+}
+
+int putLnToFile(FILE* dest, char* key, char* val) {
+    if (fputs(key, dest) &&
+        fputc(' ', dest) &&
+        fputs(val, dest) &&
+        fputc('\n', dest)) {
+        return 0;
+    }
+    return 1;
+}
+
 
 #pragma mark - Main Method
 int main (int argc, const char * argv[])
@@ -215,7 +244,7 @@ int cmdInterpreterExternal (char* cmd, char* end) {
 
 }
 
-int setExecPath(char* cmd, char* end) { //TODO: Save to config file
+int setExecPath(char* cmd, char* end) {
     if (!setPath(cmd, end, execPath)) {
         printf("Executable path set as '%s'\n", execPath);
         return 0;
@@ -225,7 +254,7 @@ int setExecPath(char* cmd, char* end) { //TODO: Save to config file
     }
 }
 
-int setDataPath(char* cmd, char* end) { //TODO: Save to config file
+int setDataPath(char* cmd, char* end) {
     if (!setPath(cmd, end, dataPath)) {
         printf("Data path set as '%s'\n", dataPath);
         return 0;
@@ -244,6 +273,7 @@ int setPath(char* cmd, char* end, char* p) {
         pathPtr++;
     }
     *pathPtr = '\0';
+    generateConfig();
     return 0;
 }
 
