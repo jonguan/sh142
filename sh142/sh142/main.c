@@ -21,10 +21,12 @@ void printPrompt() {
 }
 
 void init() {
-    SHELL_PID = getpid();
+    //SHELL_PID = getpid();
     
+    // Initialize variables
     commandIdx = -1;
     command[0] = '\0';
+    commandNumber = 0;
     
     currentPath = (char*) calloc(1024, sizeof(char));
     dataPath = (char*) calloc(1024, sizeof(char));
@@ -113,7 +115,14 @@ void loadConfig(char str1[], int c1, char str2[], int c2) {
 
 
 #pragma mark - Main Method
+/**
+	main
+	@param argc count of parameters passed in
+	@param argv array of strings passed in
+	@returns 0 if success; any other value if fail
+ */
 int main (int argc, const char * argv[])
+
 {
     init();
     while (1) {
@@ -127,16 +136,23 @@ int main (int argc, const char * argv[])
         
         command[commandIdx] = c; //Assigns a char from keyboard input to command string
         
+        //User hit return - replace \n with \0
         if (command[commandIdx] == '\n') { //The whole command is stored in command array
             command[commandIdx] = '\0';
-            
-            if (cmdInterpreter(command) == -1) break;
+        
+            //Parser goes here 
+            if (EXIT == parseInput(command)) {
+                return 0;
+            } 
+          
             
             resetCommandBuffer();
             printPrompt();
         } else {
             //TODO: Add case for "up arrow" pressed (get previous command entered)
         }
+        
+        
     }
     
     return 0;
@@ -147,21 +163,94 @@ void resetCommandBuffer() {
     for (char* c = command; *c != '\0'; c++) *c = '\0';
 }
 
+#pragma mark - Parser
+int parseInput(char *inputCommand)
+{
+    int returnValue = UNINITIALIZED;
+    char *subCommand = inputCommand; //pointer to beginning of subCommand
+    char* c = inputCommand;    // iterator through cmd
+    int AndExpression = UNINITIALIZED;
+    
+    // Break up cmd into subCommands by checking for special characters
+    // for (c = inputCommand; *c != '\0'; c++) {
+    while (*c != '\0') {
+        // Top level checks for logical operators && and || 
+        // Check for next character == null
+        char *d = c+1;
+        if (*d != '\0') {
+            if ( ((*c == '&') && (*d == '&')) || ((*c == '|') && (*d == '|')) ) {
+                //&& or ||
+                
+                 
+                
+                //replace current pointer with nil and pass through
+                *c = '\0';
+                // evaluate subCommand
+                
+                if (*d == '&'){
+                    // AND to old returnvalue
+                    printf("AND %s", subCommand);
+                    AndExpression = AND;
+                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);
+                }else if (*d == '|'){
+                    printf("OR %s", subCommand);
+                    AndExpression = OR;
+                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
+                }
+                
+                if((returnValue == 1 && *d == '&') || (returnValue == 0 && *d == '|')) 
+                {
+                    //previous failure for AND or previous true for OR
+                    // can return right away
+                    break;
+                }
+                
+                // set subCommand to next command
+                c+=2;
+                subCommand = c; 
+                continue;
+            }
+        }else{
+            // end of command - send all prevous to cmdInterpreter
+           
+            returnValue = AndExpression ? returnValue && cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
+        }
+        c++;
+        
+        // Set next entry of exitStatusArray
+        if (returnValue == EXIT) {
+            return returnValue;
+        } 
+    }
+    
 
+   
+    exitStatusArray[commandNumber] = returnValue;
+    return returnValue;
+}
 #pragma mark - Command Interpreter methods
 /*
  Checks for internal commands first, then external (from data path) later.
+ return value of 0 if successful
  */
 int cmdInterpreter (char* cmd) {
-    char* c;
-    char* d = '\0';
+    char* c = cmd;    // iterator through cmd
+    char* d = '\0'; // placeholder for 2 word arguments
+    
+ 
     for (c = cmd; *c != '\0'; c++) {
-        if (d == '\0' && *c == ' ') d = c;
+       
+        //check for spaces
+        if (d == '\0' && *c == ' ') 
+            d = c;
     }
-    if (d == '\0') d = c;
+    if (d == '\0') 
+        d = c;
+    
     int i = cmdInterpreterInternal(cmd, d, c);
     
-    if (i == -1) return -1; //Special case: exit
+    if (i == EXIT) 
+        return EXIT; //Special case: exit
     else if (i != 1); //Command was handled internally
     else if (!cmdInterpreterExternal(cmd, c)); //Command was handled externally
     else { //Command was not recognized

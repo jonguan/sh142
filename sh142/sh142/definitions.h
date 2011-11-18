@@ -27,16 +27,21 @@
 #define BACKGROUND 'B'
 #define SUSPENDED 'S'
 #define WAITING_INPUT 'W'
+#define EXIT (-1)
+#define UNINITIALIZED (-2)
+#define AND 10
+#define OR AND+1
 
 /* VARIABLES */
 static char* currentPath;
 static char* dataPath;
 static char* execPath;
-static char command[CMD_LEN];
-static int commandIdx;
+static char command[CMD_LEN];   //User input string after we initialize (without \n)
+static int commandIdx;          //Pointer to index inside string command
 static char* promptSignature;
 FILE *configFile;
-static int exitStatus[NUM_REMEMEBERED_CMDS];
+static int exitStatusArray[NUM_REMEMEBERED_CMDS];
+static int commandNumber; //Points to number of executed command
 
 //static pid_t SHELL_PID;
 //static pid_t SHELL_PGID;
@@ -45,6 +50,7 @@ static int exitStatus[NUM_REMEMEBERED_CMDS];
 //struct termios SHELL_TMODES;
 
 /* PROTOTYPES */
+int parseInput(char *inputCommand);
 void error(char* c);
 void printPrompt(void);
 void init(void);
@@ -62,5 +68,7 @@ int setPath(char* cmd, char* end, char* p);
 int validatePaths(char* pathList);
 
 void launchJob(char *command[]);
+
+
 
 #endif
