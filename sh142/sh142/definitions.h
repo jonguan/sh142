@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <errno.h> /* errno */
 #include <pthread.h>
+#include <termios.h>
 
 
 #ifndef sh142_definitions_h
@@ -20,6 +21,12 @@
 
 #define CMD_LEN 128 //TODO: This value could also be stored in the config file
 #define NUM_REMEMEBERED_CMDS 10
+#define TRUE 1
+#define FALSE !TRUE
+#define FOREGROUND 'F'
+#define BACKGROUND 'B'
+#define SUSPENDED 'S'
+#define WAITING_INPUT 'W'
 
 /* VARIABLES */
 static char* currentPath;
@@ -30,6 +37,12 @@ static int commandIdx;
 static char* promptSignature;
 FILE *configFile;
 static int exitStatus[NUM_REMEMEBERED_CMDS];
+
+//static pid_t SHELL_PID;
+//static pid_t SHELL_PGID;
+//static int SHELL_TERMINAL;
+//static int SHELL_IS_INTERACTIVE;
+//struct termios SHELL_TMODES;
 
 /* PROTOTYPES */
 void error(char* c);
@@ -48,16 +61,6 @@ int setDataPath(char* cmd, char* end);
 int setPath(char* cmd, char* end, char* p);
 int validatePaths(char* pathList);
 
-static int numActiveJobs = 0;
-
-typedef struct job {
-    int id;
-    char *name;
-    pid_t pid;
-    pid_t pgid;
-    int status;
-    char *descriptor;
-    struct job *next;
-} t_job;
+void launchJob(char *command[]);
 
 #endif

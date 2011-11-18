@@ -3,12 +3,13 @@
 //  sh142
 //
 //  Created by Øyvind Tangen on 25.10.11.
-//  Copyright 2011 Universitetet i Oslo. All rights reserved.
+//  Copyright 2011 San Jose State University. All rights reserved.
 //
 
 #include <stdio.h>
 #include "definitions.h"
 #include "pipe.h"
+#include "jobs.h"
 
 void error(char* c) {
     printf("Error: %s\n", c);
@@ -20,6 +21,8 @@ void printPrompt() {
 }
 
 void init() {
+    SHELL_PID = getpid();
+    
     commandIdx = -1;
     command[0] = '\0';
     
