@@ -22,6 +22,8 @@
 #define NUM_REMEMEBERED_CMDS 10
 #define EXIT (-1)
 #define UNINITIALIZED (-2)
+#define AND 10
+#define OR AND+1
 
 /* VARIABLES */
 static char* currentPath;
@@ -63,5 +65,7 @@ typedef struct job {
     char *descriptor;
     struct job *next;
 } t_job;
+
+
 
 #endif

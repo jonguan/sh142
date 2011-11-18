@@ -166,29 +166,42 @@ int parseInput(char *inputCommand)
     int returnValue = UNINITIALIZED;
     char *subCommand = inputCommand; //pointer to beginning of subCommand
     char* c = inputCommand;    // iterator through cmd
-    
+    int AndExpression = UNINITIALIZED;
     
     // Break up cmd into subCommands by checking for special characters
     // for (c = inputCommand; *c != '\0'; c++) {
     while (*c != '\0') {
-        // Top level checks for logical operators && and ||
+        // Top level checks for logical operators && and || 
+        // Check for next character == null
         char *d = c+1;
         if (*d != '\0') {
-            if ( ((*c == '&') && (*c+1 == '&')) || ((*c == '|') && (*c+1 == '|')) ) {
+            if ( ((*c == '&') && (*d == '&')) || ((*c == '|') && (*d == '|')) ) {
                 //&& or ||
                 
-                // check returnValue for easy break
-                if((returnValue == 1 && *c == '&') || (returnValue == 0 && *c == '|')) 
-                {
-                    //previous failure for AND or previous true for OR
-                    // can return right away
-                    break;
-                }   
+                 
                 
                 //replace current pointer with nil and pass through
                 *c = '\0';
                 // evaluate subCommand
-                returnValue = cmdInterpreter(subCommand);
+                
+                if (*d == '&'){
+                    // AND to old returnvalue
+                    printf("AND %s", subCommand);
+                    AndExpression = AND;
+                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);
+                }else if (*d == '|'){
+                    printf("OR %s", subCommand);
+                    AndExpression = OR;
+                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
+                }
+                
+                if((returnValue == 1 && *d == '&') || (returnValue == 0 && *d == '|')) 
+                {
+                    //previous failure for AND or previous true for OR
+                    // can return right away
+                    break;
+                }
+                
                 // set subCommand to next command
                 c+=2;
                 subCommand = c; 
@@ -196,7 +209,8 @@ int parseInput(char *inputCommand)
             }
         }else{
             // end of command - send all prevous to cmdInterpreter
-            returnValue = cmdInterpreter(subCommand);
+           
+            returnValue = AndExpression ? returnValue && cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
         }
         c++;
         
