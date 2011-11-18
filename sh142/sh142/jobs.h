@@ -13,7 +13,7 @@
 #define sh142_jobs_h
 
 typedef struct job {
-    int id;             //
+    int id;             // Job ID
     char *name;         // 
     pid_t pid;          // Process ID
     pid_t pgid;         // Process group ID

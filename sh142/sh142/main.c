@@ -172,8 +172,7 @@ int main (int argc, const char * argv[])
             //Parser goes here 
             if (EXIT == parseInput(command)) {
                 return 0;
-            } 
-          
+            }
             
             resetCommandBuffer();
             printPrompt();
