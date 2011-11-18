@@ -219,15 +219,16 @@ int parseInput(char *inputCommand)
                 if (*d == '&'){
                     // AND to old returnvalue
                     printf("AND %s", subCommand);
-                    AndExpression = AND;
-                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);
+                    AndExpression = TRUE;
+                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
                 }else if (*d == '|'){
                     printf("OR %s", subCommand);
-                    AndExpression = OR;
-                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
+                    AndExpression = FALSE;
+                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);
                 }
                 
-                if((returnValue == 1 && *d == '&') || (returnValue == 0 && *d == '|')) 
+                
+                if((returnValue != SUCCESS && *d == '&') || (returnValue == SUCCESS && *d == '|')) 
                 {
                     //previous failure for AND or previous true for OR
                     // can return right away
@@ -241,8 +242,12 @@ int parseInput(char *inputCommand)
             }
         }else{
             // end of command - send all prevous to cmdInterpreter
-           
-            returnValue = AndExpression ? returnValue && cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
+            if (returnValue == UNINITIALIZED) {
+                returnValue = cmdInterpreter(subCommand);
+            }else{
+                returnValue = AndExpression ? returnValue || cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);                
+            }
+
         }
         c++;
         
@@ -255,6 +260,11 @@ int parseInput(char *inputCommand)
 
    
     exitStatusArray[commandNumber] = returnValue;
+    commandNumber ++;
+    for (int i = 0; i < commandNumber; i++) {
+        printf("%d", exitStatusArray[i]);
+    }
+
     return returnValue;
 }
 #pragma mark - Command Interpreter methods
