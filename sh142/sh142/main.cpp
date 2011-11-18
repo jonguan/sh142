@@ -6,6 +6,7 @@
 //  Copyright 2011 San Jose State University. All rights reserved.
 //
 
+#include <iostream>
 #include <stdio.h>
 #include "definitions.h"
 #include "pipe.h"
@@ -109,8 +110,8 @@ void loadConfig(char str1[], int c1, char str2[], int c2) {
         execPath = value;
     }
     /*else if (strcmp(config, "CmdLength") == 0) {
-        CMD_LEN = atoi(value);
-    }*/
+     CMD_LEN = atoi(value);
+     }*/
 }
 
 int generateConfig() {
@@ -145,10 +146,10 @@ int putLnToFile(FILE* dest, char* key, char* val) {
 
 #pragma mark - Main Method
 /**
-	main
-	@param argc count of parameters passed in
-	@param argv array of strings passed in
-	@returns 0 if success; any other value if fail
+ main
+ @param argc count of parameters passed in
+ @param argv array of strings passed in
+ @returns 0 if success; any other value if fail
  */
 int main (int argc, const char * argv[])
 
@@ -168,12 +169,12 @@ int main (int argc, const char * argv[])
         //User hit return - replace \n with \0
         if (command[commandIdx] == '\n') { //The whole command is stored in command array
             command[commandIdx] = '\0';
-        
+            
             //Parser goes here 
             if (EXIT == parseInput(command)) {
                 return 0;
             } 
-          
+            
             
             resetCommandBuffer();
             printPrompt();
@@ -210,7 +211,7 @@ int parseInput(char *inputCommand)
             if ( ((*c == '&') && (*d == '&')) || ((*c == '|') && (*d == '|')) ) {
                 //&& or ||
                 
-                 
+                
                 
                 //replace current pointer with nil and pass through
                 *c = '\0';
@@ -219,15 +220,16 @@ int parseInput(char *inputCommand)
                 if (*d == '&'){
                     // AND to old returnvalue
                     printf("AND %s", subCommand);
-                    AndExpression = AND;
-                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);
+                    AndExpression = TRUE;
+                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
                 }else if (*d == '|'){
                     printf("OR %s", subCommand);
-                    AndExpression = OR;
-                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
+                    AndExpression = FALSE;
+                    returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);
                 }
                 
-                if((returnValue == 1 && *d == '&') || (returnValue == 0 && *d == '|')) 
+                
+                if((returnValue != SUCCESS && *d == '&') || (returnValue == SUCCESS && *d == '|')) 
                 {
                     //previous failure for AND or previous true for OR
                     // can return right away
@@ -241,8 +243,12 @@ int parseInput(char *inputCommand)
             }
         }else{
             // end of command - send all prevous to cmdInterpreter
-           
-            returnValue = AndExpression ? returnValue && cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
+            if (returnValue == UNINITIALIZED) {
+                returnValue = cmdInterpreter(subCommand);
+            }else{
+                returnValue = AndExpression ? returnValue || cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);                
+            }
+            
         }
         c++;
         
@@ -252,9 +258,14 @@ int parseInput(char *inputCommand)
         } 
     }
     
-
-   
+    
+    
     exitStatusArray[commandNumber] = returnValue;
+    commandNumber ++;
+    for (int i = 0; i < commandNumber; i++) {
+        printf("%d", exitStatusArray[i]);
+    }
+    
     return returnValue;
 }
 #pragma mark - Command Interpreter methods
@@ -266,9 +277,9 @@ int cmdInterpreter (char* cmd) {
     char* c = cmd;    // iterator through cmd
     char* d = '\0'; // placeholder for 2 word arguments
     
- 
+    
     for (c = cmd; *c != '\0'; c++) {
-       
+        
         //check for spaces
         if (d == '\0' && *c == ' ') 
             d = c;
@@ -309,9 +320,9 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
     } else if (!strncmp(cmd, "DATA=", 5)) {
         setDataPath(cmd + 5, end);
     } else if (range == 5 && !strncmp(cmd, "test1", range)) { //template example
-            printf("echo 1\n");
+        printf("echo 1\n");
     } else if (range == 5 && !strncmp(cmd, "test2", range)) { //template example
-            printf("echo 2 with parameters: '%s'.\n", mid + 1);
+        printf("echo 2 with parameters: '%s'.\n", mid + 1);
     } else return 1;
     return 0; //Command was processed as internal
 }
@@ -319,21 +330,21 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
 int cmdInterpreterExternal (char* cmd, char* end) {
     
     /*
-    char *ptr;
-    char *startPtr = execPath;
-    for (ptr = execPath; *ptr != '\0'; ptr++) {
-        if (*ptr == ':') {
-            *ptr = '\0';
-            printf("%s\n", startPtr); //TODO: Match cmd to path contents
-            startPtr = ptr + 1;
-            *ptr = ':';
-        }
-    }
-    printf("%s\n", startPtr);
-    return 1;
+     char *ptr;
+     char *startPtr = execPath;
+     for (ptr = execPath; *ptr != '\0'; ptr++) {
+     if (*ptr == ':') {
+     *ptr = '\0';
+     printf("%s\n", startPtr); //TODO: Match cmd to path contents
+     startPtr = ptr + 1;
+     *ptr = ':';
+     }
+     }
+     printf("%s\n", startPtr);
+     return 1;
      */
     return runExternalCommand(cmd);
-
+    
 }
 
 int setExecPath(char* cmd, char* end) {
