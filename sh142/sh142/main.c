@@ -227,13 +227,13 @@ int parseInput(char *inputCommand)
                     returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);
                 }
                 
-                /*
+                
                 if((returnValue != SUCCESS && *d == '&') || (returnValue == SUCCESS && *d == '|')) 
                 {
                     //previous failure for AND or previous true for OR
                     // can return right away
                     break;
-                }*/
+                }
                 
                 // set subCommand to next command
                 c+=2;
@@ -260,6 +260,11 @@ int parseInput(char *inputCommand)
 
    
     exitStatusArray[commandNumber] = returnValue;
+    commandNumber ++;
+    for (int i = 0; i < commandNumber; i++) {
+        printf("%d", exitStatusArray[i]);
+    }
+
     return returnValue;
 }
 #pragma mark - Command Interpreter methods
