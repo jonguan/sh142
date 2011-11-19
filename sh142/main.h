@@ -22,6 +22,7 @@ FILE *configFile;
 static int exitStatusArray[NUM_REMEMBERED_CMDS];
 static int commandNumber; //Points to number of executed command
 
+
 //static pid_t SHELL_PID;
 //static pid_t SHELL_PGID;
 //static int SHELL_TERMINAL;
@@ -30,6 +31,7 @@ static int commandNumber; //Points to number of executed command
 
 /* PROTOTYPES */
 int parseInput(char *inputCommand);
+int parsePipeCommand(char *command);
 void error(char* c);
 void printPrompt(void);
 void init(void);
@@ -51,4 +53,5 @@ int validatePaths(char* pathList);
 
 void launchJob(char *command[]);
 
+int getPastReturnValueAtIndex(int index);
 #endif

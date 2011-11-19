@@ -14,9 +14,8 @@
 #include <errno.h> /* errno */
 #include <pthread.h>
 #include <termios.h>
-#include <curses.h>
-
-
+#include <ctype.h> /* isdigit */
+#include <curses.h> /* true and false*/
 
 
 #ifndef sh142_definitions_h
@@ -33,6 +32,7 @@
 #define WAITING_INPUT 'W'
 #define EXIT (-1)
 #define UNINITIALIZED (-2)
+//#define ERROR (-3) - use EXIT_FAILURE instead
 #define SUCCESS 0
 
 /* VARIABLES */
@@ -73,6 +73,9 @@ int setPath(char* cmd, char* end, char* p);
 int validatePaths(char* pathList);
 
 void launchJob(char *command[]);
+
+
+
 
 
 #endif
