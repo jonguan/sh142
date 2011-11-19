@@ -8,11 +8,11 @@
 
 #include <iostream>
 #include <stdio.h>
-#include <string.h>
 #include "definitions.h"
 #include "pipe.h"
 #include "jobs.h"
 #include "history.h"
+#include "main.h"
 
 
 void error(char* c) {
@@ -282,7 +282,7 @@ int parseInput(char *inputCommand)
     
     
     
-    exitStatusArray[commandNumber % NUM_REMEMEBERED_CMDS] = returnValue;
+    exitStatusArray[commandNumber % NUM_REMEMBERED_CMDS] = returnValue;
     commandNumber ++;
     /*
     for (int i = 0; i < commandNumber; i++) {
@@ -379,10 +379,10 @@ int parsePipeCommand(char *command)
 }
 #pragma mark - Command Interpreter methods
 int getPastReturnValueAtIndex(int index){
-    if (index > NUM_REMEMEBERED_CMDS){
-        printf("Number of commands remembered is %d\n", NUM_REMEMEBERED_CMDS);
+    if (index > NUM_REMEMBERED_CMDS){
+        printf("Number of commands remembered is %d\n", NUM_REMEMBERED_CMDS);
     }else{
-        int arraySpot = (index < commandNumber) ? (commandNumber - index) : (NUM_REMEMEBERED_CMDS + commandNumber - index -1);
+        int arraySpot = (index < commandNumber) ? (commandNumber - index) : (NUM_REMEMBERED_CMDS + commandNumber - index -1);
         printf("%d", exitStatusArray[arraySpot]);      
         return exitStatusArray[arraySpot];
     }
