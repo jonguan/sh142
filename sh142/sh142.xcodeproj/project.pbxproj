@@ -10,6 +10,7 @@
 		B880B3E614770C26004E49A8 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3E514770C26004E49A8 /* main.cpp */; };
 		B880B3F6147714A2004E49A8 /* pipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3F5147714A2004E49A8 /* pipe.cpp */; };
 		B880B3F81477151D004E49A8 /* jobs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3F71477151D004E49A8 /* jobs.cpp */; };
+		B8B9C35414773D05002C04B2 /* history.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8B9C35314773D05002C04B2 /* history.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,6 +33,9 @@
 		B880B3F214770C83004E49A8 /* pipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pipe.h; sourceTree = "<group>"; };
 		B880B3F5147714A2004E49A8 /* pipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pipe.cpp; sourceTree = "<group>"; };
 		B880B3F71477151D004E49A8 /* jobs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jobs.cpp; sourceTree = "<group>"; };
+		B8B9C35314773D05002C04B2 /* history.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = history.cpp; sourceTree = "<group>"; };
+		B8B9C35614773D1D002C04B2 /* history.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = history.h; sourceTree = "<group>"; };
+		B8B9C3581477431D002C04B2 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = main.h; path = ../main.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,10 +69,13 @@
 			isa = PBXGroup;
 			children = (
 				B880B3EE14770C83004E49A8 /* definitions.h */,
-				B880B3F014770C83004E49A8 /* jobs.h */,
-				B880B3F214770C83004E49A8 /* pipe.h */,
+				B8B9C3581477431D002C04B2 /* main.h */,
 				B880B3E514770C26004E49A8 /* main.cpp */,
+				B8B9C35614773D1D002C04B2 /* history.h */,
+				B8B9C35314773D05002C04B2 /* history.cpp */,
+				B880B3F214770C83004E49A8 /* pipe.h */,
 				B880B3F5147714A2004E49A8 /* pipe.cpp */,
+				B880B3F014770C83004E49A8 /* jobs.h */,
 				B880B3F71477151D004E49A8 /* jobs.cpp */,
 			);
 			path = sh142;
@@ -127,6 +134,7 @@
 				B880B3E614770C26004E49A8 /* main.cpp in Sources */,
 				B880B3F6147714A2004E49A8 /* pipe.cpp in Sources */,
 				B880B3F81477151D004E49A8 /* jobs.cpp in Sources */,
+				B8B9C35414773D05002C04B2 /* history.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
