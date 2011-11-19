@@ -281,13 +281,15 @@ int parseInput(char *inputCommand)
     }
     
     
-    
-    exitStatusArray[commandNumber % NUM_REMEMBERED_CMDS] = returnValue;
+    //Put returnValue into the exit Status Array
+    exitStatusArray[commandNumber % NUM_REMEMBERED_CMDS] = returnValue == UNINITIALIZED ? 0 : returnValue;
     commandNumber ++;
-    /*
-    for (int i = 0; i < commandNumber; i++) {
-        printf("%d", exitStatusArray[i]);
-    }*/
+    
+    // Print returnValues for debug
+    for (int i = 0; i < (commandNumber % NUM_REMEMBERED_CMDS); i++) {
+        printf("%d\n", i, exitStatusArray[i]);
+    }
+    printf("\n");
     
     return returnValue;
 }
@@ -303,13 +305,20 @@ int parsePipeCommand(char *command)
    
     int returnValue = UNINITIALIZED;
 
-    char *pipe = strstr(command, "|");
-    if (pipe != NULL) {
+    char *restOfCommand = strstr(command, "|");
+    if (restOfCommand != NULL) {
         //Is a pipe command!
+        size_t lenFirstCmd = restOfCommand-command;
+        /*
         size_t nbytes = 100;
         char *data = (char *) malloc (nbytes + 1);
-
-        char *subcommand = strtok(command, "|");
+*/
+        char firstCommand[lenFirstCmd];
+        strncpy(firstCommand, command, lenFirstCmd);
+        firstCommand[lenFirstCmd] = '\0';
+        restOfCommand++;
+        returnValue = runPipeCommand(firstCommand, restOfCommand);
+        /*
         while (subcommand != NULL) {
             //send individual commands to cmdinternal
             if (returnValue == UNINITIALIZED) {
@@ -323,7 +332,8 @@ int parsePipeCommand(char *command)
 
             subcommand = strtok(NULL, "|");
         } 
-        sprintf("%s", data);
+        printf("%s\n", data);
+         */
         return returnValue;
     }else{
         // is a regular command
@@ -331,6 +341,7 @@ int parsePipeCommand(char *command)
         
     }
  
+   // returnValue = cmdInterpreter(command);
     
     
     return returnValue;
