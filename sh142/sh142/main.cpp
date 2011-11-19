@@ -25,8 +25,6 @@ void printPrompt() {
 }
 
 void init() {
-    //SHELL_PID = getpid();
-    
     // Initialize variables
     commandIdx = -1;
     command[0] = '\0';
@@ -44,6 +42,12 @@ void init() {
     saveCommandToHistory((char*)"-- no more commands --");
     
     printPrompt();
+    
+    char **comd;
+    comd[0] = (char*) "ls";
+    comd[1] = (char*) "-la";
+    comd[2] = NULL;
+    launchJob(comd);
 }
 
 #pragma mark - Configuration methods
@@ -488,7 +492,7 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
     } else if (!strncmp(cmd, "DATA=", 5)) {
         setDataPath(cmd + 5, end);
     } else if (range == 5 && !strncmp(cmd, "test1", range)) { //template example
-        printf("echo 1\n");
+        printf("echotest\n");
     } else if (range == 5 && !strncmp(cmd, "test2", range)) { //template example
         printf("echo 2 with parameters: '%s'.\n", mid + 1);
     } else return 1;

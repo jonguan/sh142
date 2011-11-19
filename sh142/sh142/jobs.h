@@ -6,12 +6,7 @@
 //  Copyright 2011 Universitetet i Oslo. All rights reserved.
 //
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <termios.h>
-#include <unistd.h>
+#include "definitions.h"
 
 #ifndef sh142_jobs_h
 #define sh142_jobs_h
@@ -19,14 +14,14 @@
 #define FOREGROUND 'F'
 #define BACKGROUND 'B'
 #define SUSPENDED 'S'
-#define WAITING_INPUT 'W'
+#define WAITINGINPUT 'W'
 
 #define STDIN 1
 #define STDOUT 2
 
-#define BY_PROCESS_ID 1
-#define BY_JOB_ID 2
-#define BY_JOB_STATUS 3
+#define PROCESSID 1
+#define JOBID 2
+#define JOBSTATUS 3
 
 
 
@@ -36,19 +31,30 @@ typedef struct job {
     pid_t pid;          // Process ID
     pid_t pgid;         // Process group ID
     int status;         // Status value
-    char *descriptor;   // 
+    //char *descriptor;   // 
     struct job *next;   // Next active job
 } job;
 
-//static pid_t SHELL_PID;
-//static pid_t SHELL_PGID;
-//static int SHELL_TERMINAL;
-//static int SHELL_IS_INTERACTIVE;
-//struct termios SHELL_TMODES;
-
-//static int numActiveJobs = 0;
+static int numberOfActiveJobs = 0;
 static job* jobList = NULL;
 
-int launchJob(char cmd[]);
+static pid_t SHELL_PID;
+static pid_t SHELL_PGID;
+static int SHELL_TERMINAL;
+static int SHELL_IS_INTERACTIVE;
+
+//struct termios SHELL_TMODES;
+
+void errormsg(char* c);
+void childSignalHandler(int i);
+void jobInit();
+int launchJob(char* cmd[]);
+int putIntoForeground(job* j);
+int putIntoBackground(job* j);
+
+job* addJob(pid_t pid, pid_t pgid, char* jobName, int status);
+int setJobStatus(int pid, int newStatus);
+job* deleteJob(job *job);
+job* getJob(int value, int type);
 
 #endif

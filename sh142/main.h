@@ -22,13 +22,6 @@ FILE *configFile;
 static int exitStatusArray[NUM_REMEMBERED_CMDS];
 static int commandNumber; //Points to number of executed command
 
-
-//static pid_t SHELL_PID;
-//static pid_t SHELL_PGID;
-//static int SHELL_TERMINAL;
-//static int SHELL_IS_INTERACTIVE;
-//struct termios SHELL_TMODES;
-
 /* PROTOTYPES */
 int parseInput(char *inputCommand);
 int parsePipeCommand(char *command);
@@ -50,8 +43,6 @@ int setExecPath(char* cmd, char* end);
 int setDataPath(char* cmd, char* end);
 int setPath(char* cmd, char* end, char* p);
 int validatePaths(char* pathList);
-
-void launchJob(char *command[]);
 
 int getPastReturnValueAtIndex(int index);
 #endif
