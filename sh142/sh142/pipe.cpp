@@ -12,10 +12,15 @@
 //Command is full command input of from the buffer
 int runExternalCommand(char *command)
 {
-    char *cmd = strtok(command, "for");
+    char *cmd = strtok(command, " ");
     
     return runSubCommand(cmd);
     
+}
+
+int runPipeCommand(char *command)
+{
+    return 0;
 }
 
 int runSubCommand(char *subCommand){
@@ -48,7 +53,7 @@ int runSubCommand(char *subCommand){
     if (pclose (ps_pipe) != 0)
     {
         fprintf (stderr,
-                 "Could not run 'ps', or other error.\n");
+                 "Could not run %s.\n", subCommand);
     }
     //fprintf (header_pipe, "%s\n", my_string);
     /* Send output of 'ps -A' to 'grep init', with two newlines */

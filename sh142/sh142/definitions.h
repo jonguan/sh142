@@ -14,6 +14,7 @@
 #include <errno.h> /* errno */
 #include <pthread.h>
 #include <termios.h>
+#include <ctype.h> /* isdigit */
 
 
 #ifndef sh142_definitions_h
@@ -29,6 +30,7 @@
 #define WAITING_INPUT 'W'
 #define EXIT (-1)
 #define UNINITIALIZED (-2)
+//#define ERROR (-3) - use EXIT_FAILURE instead
 #define SUCCESS 0
 
 /* VARIABLES */
@@ -50,6 +52,7 @@ static int commandNumber; //Points to number of executed command
 
 /* PROTOTYPES */
 int parseInput(char *inputCommand);
+int parsePipeCommand(char *command);
 void error(char* c);
 void printPrompt(void);
 void init(void);
@@ -69,7 +72,7 @@ int setPath(char* cmd, char* end, char* p);
 int validatePaths(char* pathList);
 
 void launchJob(char *command[]);
-
+int getPastReturnValueAtIndex(int index);
 
 
 #endif
