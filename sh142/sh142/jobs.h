@@ -8,9 +8,27 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <termios.h>
+#include <unistd.h>
 
 #ifndef sh142_jobs_h
 #define sh142_jobs_h
+
+#define FOREGROUND 'F'
+#define BACKGROUND 'B'
+#define SUSPENDED 'S'
+#define WAITING_INPUT 'W'
+
+#define STDIN 1
+#define STDOUT 2
+
+#define BY_PROCESS_ID 1
+#define BY_JOB_ID 2
+#define BY_JOB_STATUS 3
+
+
 
 typedef struct job {
     int id;             // Job ID
@@ -22,13 +40,14 @@ typedef struct job {
     struct job *next;   // Next active job
 } job;
 
+//static pid_t SHELL_PID;
+//static pid_t SHELL_PGID;
+//static int SHELL_TERMINAL;
+//static int SHELL_IS_INTERACTIVE;
+//struct termios SHELL_TMODES;
+
 //static int numActiveJobs = 0;
-//static job* jobList = NULL;
+static job* jobList = NULL;
 
-void putJobInForeground(job* job, int cont);
-void putJobInBackground(job* job, int cont);
-void waitJob(job* job);
-void killJob(int jobId);
-job* delJob(job* job);
-
+int launchJob(char cmd[]);
 #endif

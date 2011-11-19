@@ -42,11 +42,11 @@ FILE *configFile;
 static int exitStatusArray[NUM_REMEMEBERED_CMDS];
 static int commandNumber; //Points to number of executed command
 
-//static pid_t SHELL_PID;
-//static pid_t SHELL_PGID;
-//static int SHELL_TERMINAL;
-//static int SHELL_IS_INTERACTIVE;
-//struct termios SHELL_TMODES;
+/*static pid_t SHELL_PID;
+static pid_t SHELL_PGID;
+static int SHELL_TERMINAL;
+static int SHELL_IS_INTERACTIVE;
+struct termios SHELL_TMODES;*/
 
 /* PROTOTYPES */
 int parseInput(char *inputCommand);

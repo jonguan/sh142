@@ -3,7 +3,7 @@
 //  sh142
 //
 //  Created by Torkil Aamodt on 11/18/11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2011 San Jose State University. All rights reserved.
 //
 
 #include <iostream>
