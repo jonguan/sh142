@@ -50,4 +50,5 @@ typedef struct job {
 static job* jobList = NULL;
 
 int launchJob(char cmd[]);
+
 #endif
