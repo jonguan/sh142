@@ -1,38 +1,15 @@
 //
-//  definitions.h
+//  main.h
 //  sh142
 //
-//  Created by Torkil Aamodt on 10/30/11.
-//  Copyright 2011 Universitetet i Oslo. All rights reserved.
+//  Created by Torkil Aamodt on 11/18/11.
+//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
-#include <stdio.h> /* printf, stderr, fprintf, popen, pclose, FILE */
-#include <unistd.h> /* _exit, fork */
-#include <string.h>
-#include <stdlib.h> /* exit */
-#include <sys/stat.h>
-#include <errno.h> /* errno */
-#include <pthread.h>
-#include <termios.h>
-#include <ctype.h> /* isdigit */
+#ifndef sh142_main_h
+#define sh142_main_h
 
-
-#ifndef sh142_definitions_h
-#define sh142_definitions_h
-
-#define CMD_LEN 128 //TODO: This value could also be stored in the config file. Or could it?
-#define CMD_HISTORY_LEN 30
-#define NUM_REMEMBERED_CMDS 10
-//#define TRUE 1        //TRUE and FALSE already defined in curses.h
-//#define FALSE !TRUE
-#define FOREGROUND 'F'
-#define BACKGROUND 'B'
-#define SUSPENDED 'S'
-#define WAITING_INPUT 'W'
-#define EXIT (-1)
-#define UNINITIALIZED (-2)
-//#define ERROR (-3) - use EXIT_FAILURE instead
-#define SUCCESS 0
+#include "definitions.h"
 
 /* VARIABLES */
 static char* currentPath;
@@ -42,7 +19,7 @@ static char command[CMD_LEN];   //User input string after we initialize (without
 static int commandIdx;          //Pointer to index inside string command
 static char* promptSignature;
 FILE *configFile;
-static int exitStatusArray[NUM_REMEMEBERED_CMDS];
+static int exitStatusArray[NUM_REMEMBERED_CMDS];
 static int commandNumber; //Points to number of executed command
 
 //static pid_t SHELL_PID;
@@ -53,10 +30,10 @@ static int commandNumber; //Points to number of executed command
 
 /* PROTOTYPES */
 int parseInput(char *inputCommand);
-int parsePipeCommand(char *command);
 void error(char* c);
 void printPrompt(void);
 void init(void);
+char getKeyPress(void);
 void readConfigFile(void);
 void loadConfig(char str1[], int c1, char str2[], int c2);
 int generateConfig(void);
@@ -73,7 +50,5 @@ int setPath(char* cmd, char* end, char* p);
 int validatePaths(char* pathList);
 
 void launchJob(char *command[]);
-int getPastReturnValueAtIndex(int index);
-
 
 #endif
