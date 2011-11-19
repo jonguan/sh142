@@ -164,11 +164,23 @@ int main (int argc, const char * argv[])
         //TODO: getKeyPress() doesn't work properly. I think.
         char c = /*fgetc(stdin);*/ getKeyPress();
         
-        //Special case: retrieve previously entered command
-        //(Yup, -17, -100 and -128 all together makes the "arrow up"-button)
-        if (c == -17 && getKeyPress() == -100 && getKeyPress() == -128) {
-            loadPreviousCommandFromHistory(command);
-            //printf("%s", command);
+        //printf("pressed key: %d\n", c);
+        //continue;
+        
+        if (c == 127) { //Special case: Backspace
+            command[commandIdx--] = '\0';
+            continue;
+        }
+        //Yup, -17, -100 and -128/-127 all together makes the arrow up/down-button
+        else if (c == -17 && getKeyPress() == -100) {
+            c = getKeyPress();
+            if (c == -128) { //Arrow Up hit
+                resetCommandBuffer();
+                loadPreviousCommandFromHistory(command, &commandIdx);
+            } else if (c == -127) { //Arrow Down hit
+                resetCommandBuffer();
+                loadNextCommandFromHistory(command, &commandIdx);
+            }
             continue;
         } else if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
             error((char*)"Command buffer is full.");
@@ -202,20 +214,32 @@ int main (int argc, const char * argv[])
 
 //TODO: This is basically ripped of teh internetz, needs rewriting.
 char getKeyPress() {
-    struct termios oldt, newt;
-    int ch;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    ch = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    return ch;
+    struct termios t, newT;
+    char c;
+    
+    tcgetattr(STDIN_FILENO, &t);
+    newT = t;
+    newT.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newT);
+    c = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &t);
+    
+    return c;
 }
 
 void resetCommandBuffer() {
-    commandIdx = -1;
     for (char* c = command; *c != '\0'; c++) *c = '\0';
+    
+    /*for (int i = commandIdx; i >= 0; i--) {
+        command[i] = '\0';
+        //printf("%c", '\b');
+        //printf("/b");
+        //printf( "%c[2J", 27 );
+    }*/
+    //int c;
+    //while ((c = getchar()) != '\n' && c != EOF);
+    //fpurge(stdin);
+    commandIdx = -1;
 }
 
 #pragma mark - Parser
