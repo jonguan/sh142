@@ -41,6 +41,8 @@ void init() {
     readConfigFile();
     if (*promptSignature == '\0') promptSignature = (char*)"§";
     
+    saveCommandToHistory((char*)"-- no more commands --");
+    
     printPrompt();
 }
 
@@ -159,16 +161,16 @@ int main (int argc, const char * argv[])
 {
     init();
     while (1) {
-        //TODO: getKeyPress() doesn't work properly.
-        char c = fgetc(stdin);//getKeyPress();
+        //TODO: getKeyPress() doesn't work properly. I think.
+        char c = /*fgetc(stdin);*/ getKeyPress();
         
         //Special case: retrieve previously entered command
         //(Yup, -17, -100 and -128 all together makes the "arrow up"-button)
-        /*if (c == -17 && getKeyPress() == -100 && getKeyPress() == -128) {
-            loadPreviousCommandFromHistory();
+        if (c == -17 && getKeyPress() == -100 && getKeyPress() == -128) {
+            loadPreviousCommandFromHistory(command);
             //printf("%s", command);
             continue;
-        } else */if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
+        } else if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
             error((char*)"Command buffer is full.");
             resetCommandBuffer();
             printPrompt();
@@ -180,6 +182,7 @@ int main (int argc, const char * argv[])
         //User hit return - replace \n with \0
         if (command[commandIdx] == '\n') { //The whole command is stored in command array
             command[commandIdx] = '\0';
+            saveCommandToHistory(command);
             
             
             

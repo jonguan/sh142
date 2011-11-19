@@ -14,10 +14,13 @@
 static char cmdHistory[CMD_HISTORY_LEN][CMD_LEN];
 static int historyIdx; //Points to where in history to put next entered command
 static int historyViewIdx; //Points to which command in history to view next when arrow-keys are pressed
+static int numEntries;
 
-int loadPreviousCommandFromHistory();
-int loadNextCommandFromHistory();
-int loadCommandFromHistory(int idx);
+void loadPreviousCommandFromHistory(char dest[]);
+void loadNextCommandFromHistory(char dest[]);
+void loadCommandFromHistory(char dest[], int idx);
+
+void saveCommandToHistory(char source[]);
 
 
 #endif
