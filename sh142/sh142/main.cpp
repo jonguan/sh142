@@ -292,27 +292,77 @@ int parseInput(char *inputCommand)
     return returnValue;
 }
 
+/**
+	parsePipeCommand - checks if subCommand has any pipes in it, and calls functions accordingly
+	@param command - subcommand from parseInput
+	@returns process return value
+ */
 int parsePipeCommand(char *command)
+
 {
-    //char* c = command;    // iterator through cmd
-    //char* d = '\0'; // placeholder for 2 word arguments
+   
     int returnValue = UNINITIALIZED;
 
-    char *subcommand = strtok(command, "|");
-    while (subcommand != NULL) {
-        //send individual commands to cmdinternal
-        if (returnValue == UNINITIALIZED) {
-            returnValue = runExternalCommand(subcommand);
-        }
-        returnValue = runExternalCommand(subcommand);
-        subcommand = strtok(NULL, "|");
-    }
-    
-    /*
-    while (*c != '\0') {
-    //for (c = command; *c != '\0'; c++) {
+    char *pipe = strstr(command, "|");
+    if (pipe != NULL) {
+        //Is a pipe command!
+        size_t nbytes = 100;
+        char *data = (char *) malloc (nbytes + 1);
+
+        char *subcommand = strtok(command, "|");
+        while (subcommand != NULL) {
+            //send individual commands to cmdinternal
+            if (returnValue == UNINITIALIZED) {
+                returnValue = runPipeReadCommand(subcommand, data);
+            }else{
+                char *nextData = (char *) malloc (nbytes + 1);
+                returnValue = runPipeWriteCommand(subcommand, data, nextData);
+                free(data);
+                data = nextData;
+            }
+
+            subcommand = strtok(NULL, "|");
+        } 
+        sprintf("%s", data);
+        return returnValue;
+    }else{
+        // is a regular command
+        returnValue = cmdInterpreter(command);
         
-        // exit status
+    }
+ 
+    
+    
+    return returnValue;
+    
+    
+    
+}
+#pragma mark - Command Interpreter methods
+int getPastReturnValueAtIndex(int index){
+    if (index > NUM_REMEMBERED_CMDS){
+        printf("Number of commands remembered is %d\n", NUM_REMEMBERED_CMDS);
+    }else{
+        int arraySpot = (index < commandNumber) ? (commandNumber - index) : (NUM_REMEMBERED_CMDS + commandNumber - index -1);
+        printf("%d", exitStatusArray[arraySpot]);      
+        return exitStatusArray[arraySpot];
+    }
+    return EXIT_FAILURE;
+}
+
+
+/*
+ Checks for internal commands first, then external (from data path) later.
+ return value of 0 if successful
+ */
+int cmdInterpreter (char* cmd) {
+    int returnValue = UNINITIALIZED;
+    char *subcommand = cmd;
+    char* c = cmd;    // iterator through cmd
+    char* d = '\0'; // placeholder for 2 word arguments
+    
+    while (*c != '\0') {
+        // exit status history
         if (*c == '$' && !strncmp("$%", c, 2)) {
             c += 2;
             if (isdigit(*c)){
@@ -341,70 +391,40 @@ int parsePipeCommand(char *command)
             subcommand = c;
         }
         
-        // pipe
-        else if (*c == '|'){
-            // pass entire command to run in subfunction
-            returnValue = runPipeCommand(subcommand);
-            break;
-        }
-        
         // for 
         else if (*c == 'f' && !strncmp("for", c, 3)){
             //check rest of syntax
         }
-        
+        /*
         else if (*c == 'e' && !strncmp(c, "exit", 4)) {
             return EXIT;
         } else if (*c == 'P' && !strncmp(c, "PATH=", 5)) {
             //setExecPath(c + 5, end);
         } else if (*c == 'D' && !strncmp(c, "DATA=", 5)) {
             //setDataPath(cmd + 5, end);
-        }
+        }*/
         
         else if (*c == 'j' && !strncmp("jobs", c, 4)){
             //query available jobs
         }
+        /*
         else if(*(c+1) == '\0'){
             // last command
             returnValue = runSubCommand(subcommand);
-        }
+        }*/
+        if (d == '\0' && *c == ' ') 
+            d = c;
         
         c++; 
     }
-    */
-    return returnValue;
-    
-    
-    
-}
-#pragma mark - Command Interpreter methods
-int getPastReturnValueAtIndex(int index){
-    if (index > NUM_REMEMBERED_CMDS){
-        printf("Number of commands remembered is %d\n", NUM_REMEMBERED_CMDS);
-    }else{
-        int arraySpot = (index < commandNumber) ? (commandNumber - index) : (NUM_REMEMBERED_CMDS + commandNumber - index -1);
-        printf("%d", exitStatusArray[arraySpot]);      
-        return exitStatusArray[arraySpot];
-    }
-    return EXIT_FAILURE;
-}
-
-
-/*
- Checks for internal commands first, then external (from data path) later.
- return value of 0 if successful
- */
-int cmdInterpreter (char* cmd) {
-    
-    char* c = cmd;    // iterator through cmd
-    char* d = '\0'; // placeholder for 2 word arguments
-   
+    //char* c = cmd;    // iterator through cmd
+    //char* d = '\0'; // placeholder for 2 word arguments
+   /*
     for (c = cmd; *c != '\0'; c++) {
         
         //check for spaces
-        if (d == '\0' && *c == ' ') 
-            d = c;
-    }
+        
+    }*/
     if (d == '\0') 
         d = c;
     
@@ -448,7 +468,15 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
     return 0; //Command was processed as internal
 }
 
+/**
+	cmdInterpreterExternal
+    TODO: Parse out arguments from - and insert each cmd into jobs linked list
+	@param cmd - individual commands free from symbols except for " " and -
+	@param end 
+	@returns process return value
+ */
 int cmdInterpreterExternal (char* cmd, char* end) {
+
     
     /*
      char *ptr;
