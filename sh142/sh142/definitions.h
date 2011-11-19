@@ -43,7 +43,7 @@ static char command[CMD_LEN];   //User input string after we initialize (without
 static int commandIdx;          //Pointer to index inside string command
 static char* promptSignature;
 FILE *configFile;
-static int exitStatusArray[NUM_REMEMEBERED_CMDS];
+static int exitStatusArray[NUM_REMEMBERED_CMDS];
 static int commandNumber; //Points to number of executed command
 
 /*static pid_t SHELL_PID;
