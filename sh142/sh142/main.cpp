@@ -8,9 +8,10 @@
 
 #include <iostream>
 #include <stdio.h>
-#include "definitions.h"
+#include "main.h"
 #include "pipe.h"
 #include "jobs.h"
+#include "history.h"
 
 void error(char* c) {
     printf("Error: %s\n", c);
@@ -36,7 +37,7 @@ void init() {
     *promptSignature = '\0';
     
     readConfigFile();
-    if (*promptSignature == '\0') promptSignature = "§";
+    if (*promptSignature == '\0') promptSignature = (char*)"§";
     
     printPrompt();
 }
@@ -119,9 +120,9 @@ int generateConfig() {
     int loop = 1, status;
     for (int i = 0; loop; i++) {
         switch (i) {
-            case 0: status = putLnToFile(configFile, "DataPath", dataPath); break;
-            case 1: status = putLnToFile(configFile, "ExecPath", execPath); break;
-            case 2: status = putLnToFile(configFile, "PromptSignature", promptSignature); break;
+            case 0: status = putLnToFile(configFile, (char*)"DataPath", dataPath); break;
+            case 1: status = putLnToFile(configFile, (char*)"ExecPath", execPath); break;
+            case 2: status = putLnToFile(configFile, (char*)"PromptSignature", promptSignature); break;
                 
             default:loop = 0; break;
         }
@@ -156,9 +157,17 @@ int main (int argc, const char * argv[])
 {
     init();
     while (1) {
-        char c = fgetc(stdin);
-        if (++commandIdx >= CMD_LEN) {
-            error("Command buffer is full.");
+        //TODO: getKeyPress() doesn't work properly.
+        char c = fgetc(stdin);//getKeyPress();
+        
+        //Special case: retrieve previously entered command
+        //(Yup, -17, -100 and -128 all together makes the "arrow up"-button)
+        /*if (c == -17 && getKeyPress() == -100 && getKeyPress() == -128) {
+            loadPreviousCommandFromHistory();
+            //printf("%s", command);
+            continue;
+        } else */if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
+            error((char*)"Command buffer is full.");
             resetCommandBuffer();
             printPrompt();
             continue;
@@ -170,22 +179,33 @@ int main (int argc, const char * argv[])
         if (command[commandIdx] == '\n') { //The whole command is stored in command array
             command[commandIdx] = '\0';
             
+            
+            
+            
+            
             //Parser goes here 
             if (EXIT == parseInput(command)) {
                 return 0;
-            } 
-            
+            }
             
             resetCommandBuffer();
             printPrompt();
-        } else {
-            //TODO: Add case for "up arrow" pressed (get previous command entered)
         }
-        
-        
     }
-    
     return 0;
+}
+
+//TODO: This is basically ripped of teh internetz, needs rewriting.
+char getKeyPress() {
+    struct termios oldt, newt;
+    int ch;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return ch;
 }
 
 void resetCommandBuffer() {
@@ -352,7 +372,7 @@ int setExecPath(char* cmd, char* end) {
         printf("Executable path set as '%s'\n", execPath);
         return 0;
     } else {
-        error("Executable path was not set.");
+        error((char*)"Executable path was not set.");
         return 1;
     }
 }
@@ -362,7 +382,7 @@ int setDataPath(char* cmd, char* end) {
         printf("Data path set as '%s'\n", dataPath);
         return 0;
     } else {
-        error("Datapath was not set.");
+        error((char*)"Datapath was not set.");
         return 1;
     }
 }
