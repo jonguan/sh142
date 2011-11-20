@@ -541,7 +541,7 @@ int cmdInterpreter (char* cmd) {
  Returns 0 if command was processed, else 1.
  */
 int cmdInterpreterInternal (char* cmd) {
-    if (cmd == '\0') {
+    if (*cmd == '\0') {
     } 
     else if (!strncmp("exitStatus", cmd, 10)){
         printExitStatus();
@@ -627,9 +627,16 @@ int cmdInterpreterExternal (char* cmd) {
         tokens[i] = token;
         i++;
         token = strtok(NULL, " ");
+        //tokens+=1;
     }
     tokens[i] = '\0';
-    return launchJob(tokens, mode, (char*)"DEFAULT", 0);
+
+    
+    int flag = 0;
+    if (tokens[0] != NULL) {
+        flag = 1;
+    }
+    return launchJob(tokens, mode, (char*)"DEFAULT", flag);
     
 }
 
