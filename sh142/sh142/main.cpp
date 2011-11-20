@@ -13,14 +13,7 @@
 #include "jobs.h"
 #include "history.h"
 #include "main.h"
-<<<<<<< HEAD
 #include "forLoop.h"
-
-void error(char* c) {
-    printf("Error: %s\n", c);
-}
-=======
->>>>>>> b00b22c6404daa7166451442c2cdaf4fa7afda8f
 
 void printPrompt() {
     char *pathPtr = getcwd(currentPath, 1024);
