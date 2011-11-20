@@ -27,7 +27,7 @@ int runPipeCommand(char* inCommand, char *outCommand)
    // FILE *out_read_pipe;
     
     long bytes_read;
-    size_t nbytes = 100;
+    size_t nbytes = SIZE_PIPE_BUFFER;
     char *my_string;
     
     /* Open our two pipes */
@@ -126,7 +126,7 @@ int runPipeReadCommand(char *command, char*result)
     FILE *read_pipe;
    
     long bytes_read;
-    size_t nbytes = 100;
+    size_t nbytes = SIZE_PIPE_BUFFER;
     //char *my_string;
     
     /* Open our two pipes */
@@ -152,7 +152,7 @@ int runPipeReadCommand(char *command, char*result)
     }
             
     /* Send output of 'ps -A' to 'grep init', with two newlines */
-    
+   // printf("%s\n", result);
     return 0;
 }
 
@@ -163,7 +163,7 @@ int runPipeWriteCommand(char *command, char* inputString, char* result)
     FILE *out_pipe;
     
     long bytes_read;
-    size_t nbytes = 100;
+    size_t nbytes = SIZE_PIPE_BUFFER;
 
     /* Open our two pipes */
    // ps_pipe = popen (command, "r");
@@ -179,6 +179,7 @@ int runPipeWriteCommand(char *command, char* inputString, char* result)
     }
     
     /* Send output of 'ps -A' to 'grep init', with two newlines */
+   // printf("%s", inputString);
     fprintf (out_pipe, "%s\n\n", inputString);
     
 
@@ -195,7 +196,7 @@ int runPipeWriteCommand(char *command, char* inputString, char* result)
     
     
     bytes_read = getdelim (&result, &nbytes, '\0', out_pipe);  
-    printf("%s", result );
+    //printf("%s", result );
     
     /* Exit! */
     
@@ -209,7 +210,7 @@ int runSubCommand(char *subCommand){
     //FILE *header_pipe;
     
     long bytes_read;
-    size_t nbytes = 100;
+    size_t nbytes = SIZE_PIPE_BUFFER;
     char *my_string;
     
     /* Open our two pipes */
@@ -234,6 +235,7 @@ int runSubCommand(char *subCommand){
     {
         fprintf (stderr,
                  "Could not run %s.\n", subCommand);
+        return EXIT_FAILURE;
     }
     //fprintf (header_pipe, "%s\n", my_string);
     /* Send output of 'ps -A' to 'grep init', with two newlines */

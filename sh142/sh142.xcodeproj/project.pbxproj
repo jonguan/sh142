@@ -11,6 +11,7 @@
 		B880B3F6147714A2004E49A8 /* pipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3F5147714A2004E49A8 /* pipe.cpp */; };
 		B880B3F81477151D004E49A8 /* jobs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3F71477151D004E49A8 /* jobs.cpp */; };
 		B8B9C35414773D05002C04B2 /* history.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8B9C35314773D05002C04B2 /* history.cpp */; };
+		F42C2F9D147882D30011A6CF /* forLoop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F42C2F9C147882D30011A6CF /* forLoop.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,6 +37,8 @@
 		B8B9C35314773D05002C04B2 /* history.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = history.cpp; sourceTree = "<group>"; };
 		B8B9C35614773D1D002C04B2 /* history.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = history.h; sourceTree = "<group>"; };
 		B8B9C3581477431D002C04B2 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = main.h; path = ../main.h; sourceTree = "<group>"; };
+		F42C2F9C147882D30011A6CF /* forLoop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = forLoop.cpp; sourceTree = "<group>"; };
+		F42C2F9F147882E20011A6CF /* forLoop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = forLoop.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +80,8 @@
 				B880B3F5147714A2004E49A8 /* pipe.cpp */,
 				B880B3F014770C83004E49A8 /* jobs.h */,
 				B880B3F71477151D004E49A8 /* jobs.cpp */,
+				F42C2F9C147882D30011A6CF /* forLoop.cpp */,
+				F42C2F9F147882E20011A6CF /* forLoop.h */,
 			);
 			path = sh142;
 			sourceTree = "<group>";
@@ -135,6 +140,7 @@
 				B880B3F6147714A2004E49A8 /* pipe.cpp in Sources */,
 				B880B3F81477151D004E49A8 /* jobs.cpp in Sources */,
 				B8B9C35414773D05002C04B2 /* history.cpp in Sources */,
+				F42C2F9D147882D30011A6CF /* forLoop.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -13,7 +13,7 @@
 #include "jobs.h"
 #include "history.h"
 #include "main.h"
-
+#include "forLoop.h"
 
 void error(char* c) {
     printf("Error: %s\n", c);
@@ -251,7 +251,7 @@ int parseInput(char *inputCommand)
                 }
                 
                 
-                if((returnValue != SUCCESS && *d == '&') || (returnValue == SUCCESS && *d == '|')) 
+                if((returnValue != EXIT_SUCCESS && *d == '&') || (returnValue == EXIT_SUCCESS && *d == '|')) 
                 {
                     //previous failure for AND or previous true for OR
                     // can return right away
@@ -286,16 +286,18 @@ int parseInput(char *inputCommand)
     commandNumber ++;
     
     // Print returnValues for debug
+    /*
     for (int i = 0; i < (commandNumber % NUM_REMEMBERED_CMDS); i++) {
-        printf("%d\n", i, exitStatusArray[i]);
+        printf("%d\n", exitStatusArray[i]);
     }
     printf("\n");
-    
+    */
     return returnValue;
 }
 
 /**
 	parsePipeCommand - checks if subCommand has any pipes in it, and calls functions accordingly
+    NOTE: we can't send everything to bash shell immediately because of special characters $?1 and for loop
 	@param command - subcommand from parseInput
 	@returns process return value
  */
@@ -304,36 +306,42 @@ int parsePipeCommand(char *command)
 {
    
     int returnValue = UNINITIALIZED;
-
+/*
     char *restOfCommand = strstr(command, "|");
     if (restOfCommand != NULL) {
         //Is a pipe command!
         size_t lenFirstCmd = restOfCommand-command;
-        /*
-        size_t nbytes = 100;
-        char *data = (char *) malloc (nbytes + 1);
-*/
         char firstCommand[lenFirstCmd];
         strncpy(firstCommand, command, lenFirstCmd);
         firstCommand[lenFirstCmd] = '\0';
         restOfCommand++;
         returnValue = runPipeCommand(firstCommand, restOfCommand);
-        /*
+  */      
+    char *pipeStart = strstr(command, "|");
+    if(pipeStart != NULL){
+        // is pipe command
+        char *subcommand = strtok(command, "|");
+        size_t nbytes = SIZE_PIPE_BUFFER;
+        char *data = (char *) malloc (nbytes + 1);
+        
         while (subcommand != NULL) {
             //send individual commands to cmdinternal
             if (returnValue == UNINITIALIZED) {
+                //need to pass through cmdInterpreter to catch any commands not applicable to bash
                 returnValue = runPipeReadCommand(subcommand, data);
+                //printf("%s", data);
             }else{
                 char *nextData = (char *) malloc (nbytes + 1);
                 returnValue = runPipeWriteCommand(subcommand, data, nextData);
-                free(data);
+                //free(data);
                 data = nextData;
             }
 
             subcommand = strtok(NULL, "|");
         } 
         printf("%s\n", data);
-         */
+         
+        
         return returnValue;
     }else{
         // is a regular command
@@ -341,12 +349,7 @@ int parsePipeCommand(char *command)
         
     }
  
-   // returnValue = cmdInterpreter(command);
-    
-    
     return returnValue;
-    
-    
     
 }
 #pragma mark - Command Interpreter methods
@@ -355,8 +358,8 @@ int getPastReturnValueAtIndex(int index){
         printf("Number of commands remembered is %d\n", NUM_REMEMBERED_CMDS);
     }else{
         int arraySpot = (index < commandNumber) ? (commandNumber - index) : (NUM_REMEMBERED_CMDS + commandNumber - index -1);
-        printf("%d", exitStatusArray[arraySpot]);      
-        return exitStatusArray[arraySpot];
+        printf("%d\n", exitStatusArray[arraySpot]);      
+        return EXIT_SUCCESS; //exitStatusArray[arraySpot];
     }
     return EXIT_FAILURE;
 }
@@ -374,7 +377,7 @@ int cmdInterpreter (char* cmd) {
     
     while (*c != '\0') {
         // exit status history
-        if (*c == '$' && !strncmp("$%", c, 2)) {
+        if (*c == '$' && !strncmp("$?", c, 2)) {
             c += 2;
             if (isdigit(*c)){
                 char *space = strstr(c, " ");
@@ -384,7 +387,7 @@ int cmdInterpreter (char* cmd) {
                     
                 }
                 
-                int index = atoi(subcommand);
+                int index = atoi(c);
                 returnValue = getPastReturnValueAtIndex(index);
                 
             }else{
@@ -405,6 +408,8 @@ int cmdInterpreter (char* cmd) {
         // for 
         else if (*c == 'f' && !strncmp("for", c, 3)){
             //check rest of syntax
+            subcommand = c;
+            returnValue = runForLoopParser(subcommand);
         }
         /*
         else if (*c == 'e' && !strncmp(c, "exit", 4)) {
@@ -449,7 +454,7 @@ int cmdInterpreter (char* cmd) {
         printf("Unknown command: '%s'\n", cmd);
         return EXIT_FAILURE;
     }
-    return SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 /*
@@ -503,7 +508,8 @@ int cmdInterpreterExternal (char* cmd, char* end) {
      printf("%s\n", startPtr);
      return 1;
      */
-    return runExternalCommand(cmd);
+    return runSubCommand(cmd);  
+//    return runExternalCommand(cmd);
     
 }
 

@@ -32,8 +32,7 @@
 #define WAITING_INPUT 'W'
 #define EXIT (-1)
 #define UNINITIALIZED (-2)
-//#define ERROR (-3) - use EXIT_FAILURE instead
-#define SUCCESS 0
+#define SIZE_PIPE_BUFFER 5000
 
 
 #endif
