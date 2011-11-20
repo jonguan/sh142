@@ -49,12 +49,14 @@ void errormsg(char* c);
 void childSignalHandler(int i);
 void jobInit();
 int launchJob(char* cmd[]);
-int putIntoForeground(job* j);
-int putIntoBackground(job* j);
+void listJobs();
 
 job* addJob(pid_t pid, pid_t pgid, char* jobName, int status);
 int setJobStatus(int pid, int newStatus);
 job* deleteJob(job *job);
 job* getJob(int value, int type);
+
+void setJobInBackground(job* j,/* int cont,*/ bool bg);
+void waitJob(job* j);
 
 #endif
