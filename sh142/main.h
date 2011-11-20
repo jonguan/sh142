@@ -23,6 +23,7 @@ static int exitStatusArray[NUM_REMEMBERED_CMDS];
 static int commandNumber; //Points to number of executed command
 
 /* PROTOTYPES */
+int rememberExitStatus(int exitStatus);
 int parseInput(char *inputCommand);
 int parsePipeCommand(char *command);
 void printPrompt(void);

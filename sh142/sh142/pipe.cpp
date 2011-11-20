@@ -20,6 +20,59 @@ int runExternalCommand(char *command)
     
 }
 
+int runPipeCommand(char* inCommand, char *outCommand)
+{
+    FILE *in_pipe;
+    FILE *out_pipe;
+   // FILE *out_read_pipe;
+    
+    long bytes_read;
+    size_t nbytes = SIZE_PIPE_BUFFER;
+    char *my_string;
+    
+    /* Open our two pipes */
+    in_pipe = popen (inCommand, "r");
+    out_pipe = popen (outCommand, "w");
+   // out_read_pipe = popen(, "r");
+    
+    /* Check that pipes are non-null, therefore open */
+    if ((!in_pipe) || (!out_pipe))
+    {
+        fprintf (stderr,
+                 "One or both pipes failed.\n");
+        return EXIT_FAILURE;
+    }
+    
+    /* Read from ps_pipe until two newlines */
+    my_string = (char *) malloc (nbytes + 1);
+    bytes_read = getdelim (&my_string, &nbytes, '\0', in_pipe);
+    
+    /* Close ps_pipe, checking for errors */
+    if (pclose (in_pipe) != 0)
+    {
+        fprintf (stderr,
+                 "Could not run %s.\n", inCommand);
+    }
+
+    
+    /* Send output of 'ps -A' to 'grep init', with two newlines */
+    fprintf (out_pipe, "%s\n\n", my_string);
+    //printf("%s\n\n", my_string);
+    
+    /* Close grep_pipe, cehcking for errors */
+    if (pclose (out_pipe) != 0)
+    {
+        fprintf (stderr,
+                 "Could not run %s, or other error.\n", outCommand);
+    }
+    
+    /* Exit! */
+    free(my_string);
+    return 0;
+
+}
+
+/*
 int runPipeCommand(char** inCommand, char** outCommand)
 {
     pid_t pid;
@@ -31,7 +84,7 @@ int runPipeCommand(char** inCommand, char** outCommand)
         return EXIT_FAILURE;
     }
 
-    /* create child processes*/
+    // create child processes
     pid = fork();
     
 
@@ -65,14 +118,16 @@ int runPipeCommand(char** inCommand, char** outCommand)
     
     return 0;
     
-}
+}*/
+
+
 int runPipeReadCommand(char *command, char*result)
 {
     FILE *read_pipe;
    
     long bytes_read;
-    size_t nbytes = 100;
-    char *my_string;
+    size_t nbytes = SIZE_PIPE_BUFFER;
+    //char *my_string;
     
     /* Open our two pipes */
     read_pipe = popen (command, "r");
@@ -86,8 +141,8 @@ int runPipeReadCommand(char *command, char*result)
     }
     
     /* Read from ps_pipe until two newlines */
-    my_string = (char *) malloc (nbytes + 1);
-    bytes_read = getdelim (&my_string, &nbytes, '\0', read_pipe);
+    //my_string = (char *) malloc (nbytes + 1);
+    bytes_read = getdelim (&result, &nbytes, '\0', read_pipe);
     
     /* Close ps_pipe, checking for errors */
     if (pclose (read_pipe) != 0)
@@ -97,7 +152,7 @@ int runPipeReadCommand(char *command, char*result)
     }
             
     /* Send output of 'ps -A' to 'grep init', with two newlines */
-    
+   // printf("%s\n", result);
     return 0;
 }
 
@@ -108,7 +163,7 @@ int runPipeWriteCommand(char *command, char* inputString, char* result)
     FILE *out_pipe;
     
     long bytes_read;
-    size_t nbytes = 100;
+    size_t nbytes = SIZE_PIPE_BUFFER;
 
     /* Open our two pipes */
    // ps_pipe = popen (command, "r");
@@ -124,6 +179,7 @@ int runPipeWriteCommand(char *command, char* inputString, char* result)
     }
     
     /* Send output of 'ps -A' to 'grep init', with two newlines */
+   // printf("%s", inputString);
     fprintf (out_pipe, "%s\n\n", inputString);
     
 
@@ -140,6 +196,7 @@ int runPipeWriteCommand(char *command, char* inputString, char* result)
     
     
     bytes_read = getdelim (&result, &nbytes, '\0', out_pipe);  
+    //printf("%s", result );
     
     /* Exit! */
     
@@ -153,7 +210,7 @@ int runSubCommand(char *subCommand){
     //FILE *header_pipe;
     
     long bytes_read;
-    size_t nbytes = 100;
+    size_t nbytes = SIZE_PIPE_BUFFER;
     char *my_string;
     
     /* Open our two pipes */
@@ -178,6 +235,7 @@ int runSubCommand(char *subCommand){
     {
         fprintf (stderr,
                  "Could not run %s.\n", subCommand);
+        return EXIT_FAILURE;
     }
     //fprintf (header_pipe, "%s\n", my_string);
     /* Send output of 'ps -A' to 'grep init', with two newlines */
