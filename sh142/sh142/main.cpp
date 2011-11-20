@@ -454,6 +454,9 @@ int cmdInterpreter (char* cmd) {
             char *restOfString = strcpy(restOfString, c);
             char *operand = strtok(restOfString, " ;");
             setEnvironmentVariable(subcommand, operand);
+            
+            c+= strlen(operand);
+            subcommand = c;
         }
         
         if (d == '\0' && *c == ' ') 
