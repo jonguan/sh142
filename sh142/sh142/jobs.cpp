@@ -338,3 +338,9 @@ void waitJob(job* j)
     jobList = deleteJob(j);
 }
 
+void killJob(int id)
+{
+    job *j = getJob(id, JOBID);
+    kill(j->pid, SIGKILL);
+}
+

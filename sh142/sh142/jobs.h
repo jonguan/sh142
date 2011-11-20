@@ -59,5 +59,6 @@ job* getJob(int value, int type);
 
 void setJobInBackground(job* j, int cont, bool bg);
 void waitJob(job* j);
+void killJob(int id);
 
 #endif
