@@ -446,6 +446,15 @@ int cmdInterpreter (char* cmd) {
             c++;
             subcommand = c;
         }
+        else if (*c == '=' && isalpha(*subcommand)){
+            //Environment variable
+            *c = '\0';
+            c++;
+            //get operand 
+            char *restOfString = strcpy(restOfString, c);
+            char *operand = strtok(restOfString, " ;");
+            setEnvironmentVariable(subcommand, operand);
+        }
         
         if (d == '\0' && *c == ' ') 
             d = c;
@@ -520,12 +529,6 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
             return EXIT_FAILURE;
         }
     }
-    else if (!strncmp(cmd, "PATH=", 5)) {
-        setExecPath(cmd + 5, end);
-    } 
-    else if (!strncmp(cmd, "DATA=", 5)) {
-        setDataPath(cmd + 5, end);
-    } 
     else if (range == 5 && !strncmp(cmd, "test1", range)) { //template example
         printf("echotest\n");
     } 
@@ -582,8 +585,27 @@ int cmdInterpreterExternal (char* cmd, char* end) {
     
 }
 
-int setExecPath(char* cmd, char* end) {
-    if (!setPath(cmd, end, execPath)) {
+
+#pragma mark - Environment Variables
+int setEnvironmentVariable(char* variable, char*operand){
+    if (!strncmp(variable, "PATH", 4)) {
+        setExecPath(operand);
+    } 
+    else if (!strncmp(variable, "DATA", 4)) {
+        setDataPath(operand);
+    }else if(*variable >= 'A' && *variable <= 'Z'){
+        //Capital letter only
+        // insert into linked list?
+        
+        // need to write a getter and a setter, and also how to delete
+        
+    }
+
+    return EXIT_SUCCESS;
+}
+
+int setExecPath(char* cmd) {
+    if (!setPath(cmd, execPath)) {
         printf("Executable path set as '%s'\n", execPath);
         return 0;
     } else {
@@ -592,8 +614,8 @@ int setExecPath(char* cmd, char* end) {
     }
 }
 
-int setDataPath(char* cmd, char* end) {
-    if (!setPath(cmd, end, dataPath)) {
+int setDataPath(char* cmd) {
+    if (!setPath(cmd, dataPath)) {
         printf("Data path set as '%s'\n", dataPath);
         return 0;
     } else {
@@ -602,15 +624,16 @@ int setDataPath(char* cmd, char* end) {
     }
 }
 
-int setPath(char* cmd, char* end, char* p) {
-    if (end - cmd > 1024 || validatePaths(cmd)) return 1;
+int setPath(char* cmd, char* p) {
+    if (strlen(cmd) > 1024 || validatePaths(cmd)) return 1;
     
+    /*
     char* pathPtr = p;
     for (char* c = cmd; c != end; c++) {
         *pathPtr = *c;
         pathPtr++;
     }
-    *pathPtr = '\0';
+    *pathPtr = '\0';*/
     generateConfig();
     return 0;
 }

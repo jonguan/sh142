@@ -44,10 +44,11 @@ int cmdInterpreter (char* cmd);
 int cmdInterpreterInternal (char* cmd, char* mid, char* end);
 int cmdInterpreterExternal (char* cmd, char* end);
 
-
-int setExecPath(char* cmd, char* end);
-int setDataPath(char* cmd, char* end);
-int setPath(char* cmd, char* end, char* p);
+// Environment Varaibles
+int setEnvironmentVariable(char* variable, char*operand);
+int setExecPath(char* cmd);
+int setDataPath(char* cmd);
+int setPath(char* cmd, char* p);
 int validatePaths(char* pathList);
 
 

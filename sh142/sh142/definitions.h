@@ -14,7 +14,7 @@
 #include <errno.h> /* errno */
 #include <pthread.h>
 #include <termios.h>
-#include <ctype.h> /* isdigit */
+#include <ctype.h> /* isdigit, isalpha*/
 #include <curses.h> /* true and false*/
 #include <fcntl.h>
 #include <sys/types.h>
