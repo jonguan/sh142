@@ -39,6 +39,7 @@
 		B8B9C3581477431D002C04B2 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = main.h; path = ../main.h; sourceTree = "<group>"; };
 		F42C2F9C147882D30011A6CF /* forLoop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = forLoop.cpp; sourceTree = "<group>"; };
 		F42C2F9F147882E20011A6CF /* forLoop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = forLoop.h; sourceTree = "<group>"; };
+		F42C2FA21478AEDD0011A6CF /* Tests.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = Tests.sh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +83,7 @@
 				B880B3F71477151D004E49A8 /* jobs.cpp */,
 				F42C2F9C147882D30011A6CF /* forLoop.cpp */,
 				F42C2F9F147882E20011A6CF /* forLoop.h */,
+				F42C2FA21478AEDD0011A6CF /* Tests.sh */,
 			);
 			path = sh142;
 			sourceTree = "<group>";

@@ -218,6 +218,7 @@ void resetCommandBuffer() {
 #pragma mark - Parser
 int parseInput(char *inputCommand)
 {
+    int numForLoops = 0;
     int returnValue = UNINITIALIZED;
     char *subCommand = inputCommand; //pointer to beginning of subCommand
     char* c = inputCommand;    // iterator through cmd
@@ -226,65 +227,61 @@ int parseInput(char *inputCommand)
     // Break up cmd into subCommands by checking for special characters
     // for (c = inputCommand; *c != '\0'; c++) {
     while (*c != '\0') {
-        // Top level checks for logical operators && and || 
-        // Check for next character == null
-        char *d = c+1;
-        if (*d != '\0') {
-            if ( ((*c == '&') && (*d == '&')) || ((*c == '|') && (*d == '|')) ) {
-                //&& or ||
-                
-                
-                
-                //replace current pointer with nil and pass through
-                *c = '\0';
-                // evaluate subCommand
-                
-                if (*d == '&'){
-                    // AND to old returnvalue
-                   // printf("AND %s", subCommand);
-                    AndExpression = TRUE;
-                    returnValue = returnValue == UNINITIALIZED ? parsePipeCommand(subCommand) : returnValue || parsePipeCommand(subCommand);
-                }else if (*d == '|'){
-                   // printf("OR %s", subCommand);
-                    AndExpression = FALSE;
-                    returnValue = returnValue == UNINITIALIZED ? parsePipeCommand(subCommand) : returnValue && parsePipeCommand(subCommand);
-                }
-                
-                
-                if((returnValue != EXIT_SUCCESS && *d == '&') || (returnValue == EXIT_SUCCESS && *d == '|')) 
-                {
-                    //previous failure for AND or previous true for OR
-                    // can return right away
-                    break;
-                }
-                
-                // set subCommand to next command
-                c+=2;
-                subCommand = c; 
-                continue;
+        // Top level checks for logical operators && and || and for loops
+     
+         if (*c == '&' && !strncmp(c, "&&", 2) && numForLoops == 0) {
+            *c = '\0';
+            if (returnValue == EXIT_FAILURE) {
+                // Fast returning
+                rememberExitStatus(returnValue);
+                return returnValue;
             }
-        }else{
-            // end of command - send all prevous to cmdInterpreter
-            if (returnValue == UNINITIALIZED) {
-                returnValue = parsePipeCommand(subCommand);
-            }else{
-                returnValue = AndExpression ? returnValue || parsePipeCommand(subCommand) : returnValue && parsePipeCommand(subCommand);                
-            }
-            
+            AndExpression = TRUE;
+            returnValue = returnValue == UNINITIALIZED ? parsePipeCommand(subCommand) : returnValue || parsePipeCommand(subCommand);
+            c+=2;
+            subCommand = c;
         }
-        c++;
+        else if(*c == '|' && !strncmp(c, "||", 2) && numForLoops == 0){
+            *c = '\0';
+            if (returnValue == EXIT_SUCCESS) {
+                // Fast return
+                rememberExitStatus(returnValue);
+                return returnValue;
+            }
+            AndExpression = FALSE;
+            returnValue = returnValue == UNINITIALIZED ? parsePipeCommand(subCommand) : returnValue && parsePipeCommand(subCommand);
+            c+=2;
+            subCommand = c;
+        }
+        else if (*c == 'f'){
+            //Increment or decrement forloop counter
+            if(!strncmp("forend", c, 6)) {
+                c+=6;
+                numForLoops--;
+            }else if(!strncmp("for", c, 3)){
+                c+=3;
+                numForLoops++;
+            }
+
+        }else{
+            c++;
+        }
         
-        // Set next entry of exitStatusArray
         if (returnValue == EXIT) {
             return returnValue;
         } 
+      
     }
     
+    // end of command - send all prevous to cmdInterpreter
+    if (returnValue == UNINITIALIZED) {
+        returnValue = parsePipeCommand(subCommand);
+    }else{
+        returnValue = AndExpression ? returnValue || parsePipeCommand(subCommand) : returnValue && parsePipeCommand(subCommand);                
+    }
     
-    //Put returnValue into the exit Status Array
-    exitStatusArray[commandNumber % NUM_REMEMBERED_CMDS] = returnValue == UNINITIALIZED ? 0 : returnValue;
-    commandNumber ++;
-    
+       
+    rememberExitStatus(returnValue);
     // Print returnValues for debug
     /*
     for (int i = 0; i < (commandNumber % NUM_REMEMBERED_CMDS); i++) {
@@ -295,9 +292,21 @@ int parseInput(char *inputCommand)
     return returnValue;
 }
 
+
+int rememberExitStatus(int exitStatus)
+{
+    //Put returnValue into the exit Status Array
+    exitStatusArray[commandNumber % NUM_REMEMBERED_CMDS] = exitStatus == UNINITIALIZED ? 0 : exitStatus;
+    commandNumber ++;
+
+    return EXIT_SUCCESS;
+}
+
 /**
-	parsePipeCommand - checks if subCommand has any pipes in it, and calls functions accordingly
+	parsePipeCommand - checks if subCommand has any pipes or for loops in it, and calls functions accordingly
+ 
     NOTE: we can't send everything to bash shell immediately because of special characters $?1 and for loop
+ 
 	@param command - subcommand from parseInput
 	@returns process return value
  */
