@@ -546,8 +546,25 @@ int cmdInterpreterExternal (char* cmd, char* end) {
      printf("%s\n", startPtr);
      return 1;
      */
-    return runSubCommand(cmd);  
-//    return runExternalCommand(cmd);
+    
+    int mode = UNINITIALIZED;
+    char* ampersand = strstr(cmd, "&");
+    if (ampersand - cmd > 0) {
+        mode = BACKGROUND;
+    }else{
+        mode = FOREGROUND; 
+    }
+        
+    char *token = strtok(cmd, " ");
+    char *tokens[20];
+    int i = 0;
+    while (token != NULL) {
+        tokens[i] = token;
+        i++;
+        token = strtok(NULL, " ");
+    }
+    tokens[i] = '\0';
+    return launchJob(tokens, mode, (char*)"DEFAULT", 0);
     
 }
 

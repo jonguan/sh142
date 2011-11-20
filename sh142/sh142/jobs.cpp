@@ -9,12 +9,22 @@
 #include "jobs.h"
 //#include "main.h"
 
+/**
+	launchJob
+	@param cmd - array of strings from command where cmd[0] = command name and all else are descriptors
+	@param mode - FOREGROUND or BACKGROUND
+	@param path - path to a file
+	@param flag - STDIN or STDOUT
+	@returns int exit status
+ */
 int launchJob(char* cmd[], int mode, char* path, int flag)
+
 {
     pid_t pid = fork();
     
     if (pid == -1) { //Error forking
         errormsg((char*)"Failed to fork new process");
+        return EXIT_FAILURE;
     } else if (pid == 0) { //Child only
         signal(SIGQUIT, SIG_DFL);
         signal(SIGTTOU, SIG_DFL);
@@ -46,13 +56,10 @@ int launchJob(char* cmd[], int mode, char* path, int flag)
         if (execvp(*cmd, cmd) == -1) perror("Failed to execute job");
         
         exit(EXIT_SUCCESS);
-        
+        //return EXIT_SUCCESS;
     } else { //Parent only
         
         setpgid(pid, pid); //Will default to pid
-        if (getpgid(pid) != pid) { //TODO: Remove if when it works
-            printf("Change call 'setpgid(0, 0)' to 'setpgid(pid, pid)' in launchJob()");
-        }
         
         jobList = addJob(pid, pid, *cmd, path, mode);
         job *j = getJob(pid, PROCESSID);
@@ -61,13 +68,13 @@ int launchJob(char* cmd[], int mode, char* path, int flag)
             case BACKGROUND: setJobInBackground(j, 0, true); break;
             default: break;
         }
-        
+        wait(NULL);
     }
     
     
     
     
-    return 1;
+    return EXIT_SUCCESS;
 }
 
 void errormsg(char* c) {
