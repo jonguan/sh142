@@ -394,6 +394,13 @@ int parsePipeCommand(char *command)
 // returns exit status; upon return, forLoop will be set to the command input after forend, or NULL if finished
 int runForLoopParser(char *forLoop)
 {
+    char *c = forLoop;
+    
+    //assume for loop is given in entirety
+    if (!strncmp(forLoop, "for", 3)) {
+        c+=3;
+        
+    }
     //size_t forLength = strlen(forLoop);
     while (1) {
         char c = /*fgetc(stdin);*/ getKeyPress();
