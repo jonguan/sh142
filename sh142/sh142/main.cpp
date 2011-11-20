@@ -287,7 +287,7 @@ int parseInput(char *inputCommand)
             if(!strncmp("forend", c, 6)) {
                 c+=6;
                 numForLoops--;
-            }else if(!strncmp("for", c, 3)){
+            }else if(!strncmp("for ", c, 4) || !strncmp("for(", c, 4)){
                 c+=3;
                 numForLoops++;
             }
@@ -342,8 +342,8 @@ int rememberExitStatus(int exitStatus)
 int parsePipeCommand(char *command)
 
 {
-   
     int returnValue = UNINITIALIZED;
+  
 /*
     char *restOfCommand = strstr(command, "|");
     if (restOfCommand != NULL) {
@@ -412,6 +412,9 @@ int cmdInterpreter (char* cmd) {
     char *subcommand = cmd;
     char* c = cmd;    // iterator through cmd
     char* d = '\0'; // placeholder for 2 word arguments
+    //Set up storage buffer
+    char *data = (char *) malloc (SIZE_PIPE_BUFFER + 1); //buffer for pipe
+   
     
     while (*c != '\0') {
         // exit status history
@@ -435,37 +438,40 @@ int cmdInterpreter (char* cmd) {
             subcommand = c;
         }
         
-        // bg process
-        else if (*c == '&'){
-            // putIntoBackground(subcommand);
+        else if(!strncmp("for ", c, 4) || !strncmp("for(", c, 4)){
+            //for loop - send 
+            returnValue = runForLoopParser(c);
+        }
+        else if (*c == '|'){
+            //Pipe command
             *c = '\0';
+            
+            if (returnValue == UNINITIALIZED) {
+                // run command, put in data
+                returnValue = runPipeReadCommand(subcommand, data);
+            }else{
+                // send data in and store into buffer
+                char *nextData = (char *) malloc (SIZE_PIPE_BUFFER + 1);
+                returnValue = runPipeWriteCommand(subcommand, data, nextData);
+                free(data);
+                data = nextData;
+            }
+            
+            // get next process to pass results
             c++;
             subcommand = c;
         }
         
-        // for 
-        else if (*c == 'f' && !strncmp("for", c, 3)){
-            //check rest of syntax
-            subcommand = c;
-            returnValue = runForLoopParser(subcommand);
-        }
         /*
-        else if (*c == 'e' && !strncmp(c, "exit", 4)) {
-            return EXIT;
-        } else if (*c == 'P' && !strncmp(c, "PATH=", 5)) {
-            //setExecPath(c + 5, end);
-        } else if (*c == 'D' && !strncmp(c, "DATA=", 5)) {
-            //setDataPath(cmd + 5, end);
-        }*/
+         else if (*c == 'e' && !strncmp(c, "exit", 4)) {
+         return EXIT;
+         } else if (*c == 'P' && !strncmp(c, "PATH=", 5)) {
+         //setExecPath(c + 5, end);
+         } else if (*c == 'D' && !strncmp(c, "DATA=", 5)) {
+         //setDataPath(cmd + 5, end);
+         }*/
         
-        else if (*c == 'j' && !strncmp("jobs", c, 4)){
-            //query available jobs
-        }
-        /*
-        else if(*(c+1) == '\0'){
-            // last command
-            returnValue = runSubCommand(subcommand);
-        }*/
+    
         if (d == '\0' && *c == ' ') 
             d = c;
         
@@ -492,6 +498,8 @@ int cmdInterpreter (char* cmd) {
         printf("Unknown command: '%s'\n", cmd);
         return EXIT_FAILURE;
     }
+    
+    free(data);
     return EXIT_SUCCESS;
 }
 
@@ -508,18 +516,31 @@ int cmdInterpreter (char* cmd) {
 int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
     long range = mid - cmd;
     if (end == cmd) {
-    } else if (range == 4 && !strncmp(cmd, "exit", 4)) {
+    } 
+    else if (range == 4 && !strncmp(cmd, "exit", 4)) {
         return -1;
-    } else if (!strncmp(cmd, "PATH=", 5)) {
+    } 
+    else if (range == 4 && !strncmp(cmd, "jobs", 4)){
+        listJobs();
+        return EXIT_SUCCESS;
+    }
+    else if (range == 4 && !strncmp(cmd, "kill", 4)){
+        
+    }
+    else if (!strncmp(cmd, "PATH=", 5)) {
         setExecPath(cmd + 5, end);
-    } else if (!strncmp(cmd, "DATA=", 5)) {
+    } 
+    else if (!strncmp(cmd, "DATA=", 5)) {
         setDataPath(cmd + 5, end);
-    } else if (range == 5 && !strncmp(cmd, "test1", range)) { //template example
+    } 
+    else if (range == 5 && !strncmp(cmd, "test1", range)) { //template example
         printf("echotest\n");
-    } else if (range == 5 && !strncmp(cmd, "test2", range)) { //template example
+    } 
+    else if (range == 5 && !strncmp(cmd, "test2", range)) { //template example
         printf("echo 2 with parameters: '%s'.\n", mid + 1);
-    } else return 1;
-    return 0; //Command was processed as internal
+    } 
+    else return EXIT_FAILURE; //not an internal command
+    return EXIT_SUCCESS; //Command was processed as internal
 }
 
 /**

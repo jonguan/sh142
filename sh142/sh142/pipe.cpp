@@ -180,7 +180,7 @@ int runPipeWriteCommand(char *command, char* inputString, char* result)
     
     /* Send output of 'ps -A' to 'grep init', with two newlines */
    // printf("%s", inputString);
-    fprintf (out_pipe, "%s\n\n", inputString);
+    fprintf (out_pipe, "%s", inputString);
     
 
     // Try to read out_pipe into a string

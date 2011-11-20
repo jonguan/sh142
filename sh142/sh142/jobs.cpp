@@ -45,15 +45,18 @@ int launchJob(char* cmd[], int mode, char* path, int flag)
         int descriptor;
         if (flag == STDIN) {
             descriptor = open(path, O_RDONLY, 0600);
-            dup2(descriptor, STDIN_FILENO);
+            dup2(descriptor, STDIN_FILENO); //when running cmd, will take path as input
             close(descriptor);
         }
         if (flag == STDOUT) {
             descriptor = open(path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
-            dup2(descriptor, STDOUT_FILENO);
+            dup2(descriptor, STDOUT_FILENO); //when running cmd, will write out to path
             close(descriptor);
         }
-        if (execvp(*cmd, cmd) == -1) perror("Failed to execute job");
+        if (execvp(*cmd, cmd) == -1){
+            perror("Failed to execute job");
+            exit(EXIT_FAILURE);
+        }
         
         exit(EXIT_SUCCESS);
         //return EXIT_SUCCESS;
