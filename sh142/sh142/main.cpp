@@ -266,7 +266,7 @@ int parseInput(char *inputCommand)
                 return returnValue;
             }
             AndExpression = TRUE;
-            returnValue = returnValue == UNINITIALIZED ? parsePipeCommand(subCommand) : returnValue || parsePipeCommand(subCommand);
+            returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue || cmdInterpreter(subCommand);
             c+=2;
             subCommand = c;
         }
@@ -278,7 +278,7 @@ int parseInput(char *inputCommand)
                 return returnValue;
             }
             AndExpression = FALSE;
-            returnValue = returnValue == UNINITIALIZED ? parsePipeCommand(subCommand) : returnValue && parsePipeCommand(subCommand);
+            returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);
             c+=2;
             subCommand = c;
         }
@@ -304,9 +304,9 @@ int parseInput(char *inputCommand)
     
     // end of command - send all prevous to cmdInterpreter
     if (returnValue == UNINITIALIZED) {
-        returnValue = parsePipeCommand(subCommand);
+        returnValue = cmdInterpreter(subCommand);
     }else{
-        returnValue = AndExpression ? returnValue || parsePipeCommand(subCommand) : returnValue && parsePipeCommand(subCommand);                
+        returnValue = AndExpression ? returnValue || cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);                
     }
     
        
@@ -447,29 +447,12 @@ int cmdInterpreter (char* cmd) {
             subcommand = c;
         }
         
-        /*
-         else if (*c == 'e' && !strncmp(c, "exit", 4)) {
-         return EXIT;
-         } else if (*c == 'P' && !strncmp(c, "PATH=", 5)) {
-         //setExecPath(c + 5, end);
-         } else if (*c == 'D' && !strncmp(c, "DATA=", 5)) {
-         //setDataPath(cmd + 5, end);
-         }*/
-        
-    
         if (d == '\0' && *c == ' ') 
             d = c;
         
         c++; 
     }
-    //char* c = cmd;    // iterator through cmd
-    //char* d = '\0'; // placeholder for 2 word arguments
-   /*
-    for (c = cmd; *c != '\0'; c++) {
-        
-        //check for spaces
-        
-    }*/
+
     if (d == '\0') 
         d = c;
     
