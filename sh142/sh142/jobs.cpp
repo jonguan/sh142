@@ -55,7 +55,8 @@ int launchJob(char* cmd[], int mode, char* path, int flag)
         }
         if (execvp(*cmd, cmd) == -1){
             perror("Failed to execute job");
-            exit(EXIT_FAILURE);
+            //exit(EXIT_FAILURE);
+            return EXIT_FAILURE;
         }
         
         exit(EXIT_SUCCESS);

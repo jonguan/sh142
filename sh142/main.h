@@ -23,9 +23,15 @@ static int exitStatusArray[NUM_REMEMBERED_CMDS];
 static int commandNumber; //Points to number of executed command
 
 /* PROTOTYPES */
+//Exit status
 int rememberExitStatus(int exitStatus);
+void printExitStatus();
+int getPastReturnValueAtIndex(int index);
+
+//Parsing
 int parseInput(char *inputCommand);
 int parsePipeCommand(char *command);
+
 void printPrompt(void);
 void init(void);
 char getKeyPress(void);
@@ -44,5 +50,5 @@ int setDataPath(char* cmd, char* end);
 int setPath(char* cmd, char* end, char* p);
 int validatePaths(char* pathList);
 
-int getPastReturnValueAtIndex(int index);
+
 #endif

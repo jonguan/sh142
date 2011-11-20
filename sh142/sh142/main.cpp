@@ -311,13 +311,7 @@ int parseInput(char *inputCommand)
     
        
     rememberExitStatus(returnValue);
-    // Print returnValues for debug
-    /*
-    for (int i = 0; i < (commandNumber % NUM_REMEMBERED_CMDS); i++) {
-        printf("%d\n", exitStatusArray[i]);
-    }
-    printf("\n");
-    */
+ 
     return returnValue;
 }
 
@@ -329,6 +323,16 @@ int rememberExitStatus(int exitStatus)
     commandNumber ++;
 
     return EXIT_SUCCESS;
+}
+
+void printExitStatus(){
+    // Print returnValues for debug
+    
+     for (int i = 0; i < (commandNumber % NUM_REMEMBERED_CMDS); i++) {
+     printf("%d\n", exitStatusArray[i]);
+     }
+     printf("\n");
+     
 }
 
 /**
@@ -417,28 +421,9 @@ int cmdInterpreter (char* cmd) {
    
     
     while (*c != '\0') {
-        // exit status history
-        if (*c == '$' && !strncmp("$?", c, 2)) {
-            c += 2;
-            if (isdigit(*c)){
-                char *space = strstr(c, " ");
-                if (space != NULL) {
-                    *space = '\0';
-                    c = space+1;
-                    
-                }
-                
-                int index = atoi(c);
-                returnValue = getPastReturnValueAtIndex(index);
-                
-            }else{
-                // have $%notANumber
-                returnValue = EXIT_FAILURE;
-            }
-            subcommand = c;
-        }
         
-        else if(!strncmp("for ", c, 4) || !strncmp("for(", c, 4)){
+        
+        if(!strncmp("for ", c, 4) || !strncmp("for(", c, 4)){
             //for loop - send 
             returnValue = runForLoopParser(c);
         }
@@ -492,10 +477,13 @@ int cmdInterpreter (char* cmd) {
     
     if (i == EXIT) 
         return EXIT; //Special case: exit
-    else if (i != 1); //Command was handled internally
-    else if (!cmdInterpreterExternal(cmd, c)); //Command was handled externally
+    else if (i != 1) 
+        rememberExitStatus(i); //Command was handled internally
+    else if (!cmdInterpreterExternal(cmd, c))
+        rememberExitStatus(EXIT_SUCCESS); //Command was handled externally
     else { //Command was not recognized
         printf("Unknown command: '%s'\n", cmd);
+        rememberExitStatus(EXIT_FAILURE);
         return EXIT_FAILURE;
     }
     
@@ -517,15 +505,37 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
     long range = mid - cmd;
     if (end == cmd) {
     } 
+    else if (!strncmp("exitStatus", cmd, 10)){
+        printExitStatus();
+    }
     else if (range == 4 && !strncmp(cmd, "exit", 4)) {
         return -1;
     } 
     else if (range == 4 && !strncmp(cmd, "jobs", 4)){
         listJobs();
-        return EXIT_SUCCESS;
     }
     else if (range == 4 && !strncmp(cmd, "kill", 4)){
         
+    }
+    else if (!strncmp("$?", cmd, 2)) {
+        // exit status history
+        char *c = cmd;
+        c += 2;
+        if (isdigit(*c)){
+            char *space = strstr(c, " ");
+            if (space != NULL) {
+                *space = '\0';
+                c = space+1;
+                
+            }
+            
+            int index = atoi(c);
+            return getPastReturnValueAtIndex(index);
+            
+        }else{
+            // have $%notANumber
+            return EXIT_FAILURE;
+        }
     }
     else if (!strncmp(cmd, "PATH=", 5)) {
         setExecPath(cmd + 5, end);
