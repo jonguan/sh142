@@ -48,19 +48,16 @@ static struct termios SHELL_TMODES;
 int launchJob(char* cmd[], int mode, char* path, int flag);
 void errormsg(char* c);
 
-
 void childSignalHandler(int i);
 void jobInit();
-int launchJob(char* cmd[]);
 void listJobs();
 
 job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status);
->>>>>>> 0a16eca8255970db59c88632023948a08b7b8012
 int setJobStatus(int pid, int newStatus);
 job* deleteJob(job *job);
 job* getJob(int value, int type);
 
-void setJobInBackground(job* j,/* int cont,*/ bool bg);
+void setJobInBackground(job* j, int cont, bool bg);
 void waitJob(job* j);
 
 #endif

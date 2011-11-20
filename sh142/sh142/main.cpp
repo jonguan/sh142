@@ -37,16 +37,14 @@ void init() {
     saveCommandToHistory((char*)"-- no more commands --");
     
     printPrompt();
-<<<<<<< HEAD
     
-    char **cmd;
-    cmd[0] = (char*) "ls";
-    cmd[1] = (char*) "-la";
-    cmd[2] = NULL;
+    /*char *cmd[2];
+    cmd[0] = (char*) "emacs";
+    cmd[1] = (char*) NULL;
+    //cmd[2] = NULL;
     
     launchJob(cmd, FOREGROUND, (char*)"DEFAULT", 0);
-=======
->>>>>>> 0a16eca8255970db59c88632023948a08b7b8012
+    int launchJob(char* cmd[], int mode, char* path, int flag);*/
 }
 
 #pragma mark - Configuration methods

@@ -7,7 +7,6 @@
 //
 
 #include "jobs.h"
-<<<<<<< HEAD
 //#include "main.h"
 
 int launchJob(char* cmd[], int mode, char* path, int flag)
@@ -33,7 +32,7 @@ int launchJob(char* cmd[], int mode, char* path, int flag)
         }
         
         //Run the job
-        /*int descriptor;
+        int descriptor;
         if (flag == STDIN) {
             descriptor = open(path, O_RDONLY, 0600);
             dup2(descriptor, STDIN_FILENO);
@@ -43,23 +42,23 @@ int launchJob(char* cmd[], int mode, char* path, int flag)
             descriptor = open(path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
             dup2(descriptor, STDOUT_FILENO);
             close(descriptor);
-        }*/
+        }
         if (execvp(*cmd, cmd) == -1) perror("Failed to execute job");
         
         exit(EXIT_SUCCESS);
         
     } else { //Parent only
         
-        setpgid(0, 0); //Will default to pid
+        setpgid(pid, pid); //Will default to pid
         if (getpgid(pid) != pid) { //TODO: Remove if when it works
             printf("Change call 'setpgid(0, 0)' to 'setpgid(pid, pid)' in launchJob()");
         }
         
-        jobList = addJob(pid, pid, *cmd, mode);
+        jobList = addJob(pid, pid, *cmd, path, mode);
         job *j = getJob(pid, PROCESSID);
         switch (mode) {
-            //case FOREGROUND: setJobInBackground(j, /*continue, */false); break;
-            //case BACKGROUND: setJobInBackground(j, /*continue, */true); break;    
+            case FOREGROUND: setJobInBackground(j, 0, false); break;
+            case BACKGROUND: setJobInBackground(j, 0, true); break;
             default: break;
         }
         
@@ -70,8 +69,6 @@ int launchJob(char* cmd[], int mode, char* path, int flag)
     
     return 1;
 }
-=======
->>>>>>> 0a16eca8255970db59c88632023948a08b7b8012
 
 void errormsg(char* c) {
     printf("Error: %s\n", c);
