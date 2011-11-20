@@ -553,6 +553,14 @@ int cmdInterpreterInternal (char* cmd) {
         listJobs();
     }
     else if (!strncmp(cmd, "kill", 4)){
+        char *number = strtok(cmd, "kill ");
+        int n = atoi(number);
+        killJob(n);
+    }
+    else if(!strncmp(cmd, "fg", 2)) {
+        
+    }
+    else if (!strncmp(cmd, "bg", 2)) {
         
     }
     else if (!strncmp("$?", cmd, 2)) {
