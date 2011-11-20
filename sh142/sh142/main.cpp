@@ -6,14 +6,12 @@
 //  Copyright 2011 San Jose State University. All rights reserved.
 //
 
-#include <iostream>
-#include <stdio.h>
-#include "definitions.h"
+
+#include "main.h"
 #include "pipe.h"
 #include "jobs.h"
 #include "history.h"
-#include "main.h"
-#include "forLoop.h"
+//#include "forLoop.h"
 
 void printPrompt() {
     char *pathPtr = getcwd(currentPath, 1024);
@@ -198,10 +196,6 @@ int main (int argc, const char * argv[])
             command[commandIdx] = '\0';
             saveCommandToHistory(command);
             
-            
-            
-            
-            
             //Parser goes here 
             if (EXIT == parseInput(command)) {
                 return 0;
@@ -211,7 +205,7 @@ int main (int argc, const char * argv[])
             printPrompt();
         }
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 //TODO: This is basically ripped of teh internetz, needs rewriting.
@@ -288,7 +282,7 @@ int parseInput(char *inputCommand)
                 c+=6;
                 numForLoops--;
             }else if(!strncmp("for ", c, 4) || !strncmp("for(", c, 4)){
-                c+=3;
+                c+=4;
                 numForLoops++;
             }
 
@@ -394,6 +388,46 @@ int parsePipeCommand(char *command)
     return returnValue;
     
 }
+
+// Gets entire beginning of for loop
+// if complete syntax is not given, then will print > for more input
+// returns exit status; upon return, forLoop will be set to the command input after forend, or NULL if finished
+int runForLoopParser(char *forLoop)
+{
+    //size_t forLength = strlen(forLoop);
+    while (1) {
+        char c = /*fgetc(stdin);*/ getKeyPress();
+        
+        
+        if (c == 127) { //Special case: Backspace
+            command[commandIdx--] = '\0';
+            continue;
+        }
+        else if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
+            perror((char*)"Command buffer is full.");
+            resetCommandBuffer();
+            printPrompt();
+            continue;
+        }
+        
+        command[commandIdx] = c; //Assigns a char from keyboard input to command string
+        
+        //User hit return - replace \n with \0
+        if (command[commandIdx] == '\n') { //The whole command is stored in command array
+            command[commandIdx] = '\0';
+            
+            //Parser goes here 
+            if (EXIT == parseInput(command)) {
+                return EXIT_SUCCESS;
+            }
+            
+            resetCommandBuffer();
+            printPrompt();
+        }
+    }
+    return EXIT_SUCCESS;
+}
+
 #pragma mark - Command Interpreter methods
 int getPastReturnValueAtIndex(int index){
     if (index > NUM_REMEMBERED_CMDS){
@@ -415,7 +449,7 @@ int cmdInterpreter (char* cmd) {
     int returnValue = UNINITIALIZED;
     char *subcommand = cmd;
     char* c = cmd;    // iterator through cmd
-    char* d = '\0'; // placeholder for 2 word arguments
+    
     //Set up storage buffer
     char *data = (char *) malloc (SIZE_PIPE_BUFFER + 1); //buffer for pipe
    
@@ -425,7 +459,11 @@ int cmdInterpreter (char* cmd) {
         
         if(!strncmp("for ", c, 4) || !strncmp("for(", c, 4)){
             //for loop - send 
-            returnValue = runForLoopParser(c);
+            //returnValue = runForLoopParser(c);
+            if (c == NULL) {
+                //finished
+                break;
+            }
         }
         else if (*c == '|'){
             //Pipe command
@@ -457,31 +495,30 @@ int cmdInterpreter (char* cmd) {
             
             c+= strlen(operand);
             subcommand = c;
+        }else{
+            c++;
         }
         
-        if (d == '\0' && *c == ' ') 
-            d = c;
-        
-        c++; 
     }
 
-    if (d == '\0') 
-        d = c;
     
-    int i = cmdInterpreterInternal(cmd, d, c);
-    
-    if (i == EXIT) 
-        return EXIT; //Special case: exit
-    else if (i != 1) 
-        rememberExitStatus(i); //Command was handled internally
-    else if (!cmdInterpreterExternal(cmd, c))
-        rememberExitStatus(EXIT_SUCCESS); //Command was handled externally
-    else { //Command was not recognized
-        printf("Unknown command: '%s'\n", cmd);
-        rememberExitStatus(EXIT_FAILURE);
-        return EXIT_FAILURE;
+    if (returnValue == UNINITIALIZED) {
+        returnValue = cmdInterpreterInternal(cmd);  
+        if (returnValue == EXIT) 
+            return EXIT; //Special case: exit
+        else if (returnValue != EXIT_FAILURE) 
+            rememberExitStatus(returnValue); //Command was handled internally
+        else if (!cmdInterpreterExternal(cmd))
+            rememberExitStatus(EXIT_SUCCESS); //Command was handled externally
+        else { //Command was not recognized
+            printf("Unknown command: '%s'\n", cmd);
+            rememberExitStatus(EXIT_FAILURE);
+            return EXIT_FAILURE;
+        }
+
     }
-    
+        
+        
     free(data);
     return EXIT_SUCCESS;
 }
@@ -496,20 +533,19 @@ int cmdInterpreter (char* cmd) {
  
  Returns 0 if command was processed, else 1.
  */
-int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
-    long range = mid - cmd;
-    if (end == cmd) {
+int cmdInterpreterInternal (char* cmd) {
+    if (cmd == '\0') {
     } 
     else if (!strncmp("exitStatus", cmd, 10)){
         printExitStatus();
     }
-    else if (range == 4 && !strncmp(cmd, "exit", 4)) {
+    else if (!strncmp(cmd, "exit", 4)) {
         return -1;
     } 
-    else if (range == 4 && !strncmp(cmd, "jobs", 4)){
+    else if (!strncmp(cmd, "jobs", 4)){
         listJobs();
     }
-    else if (range == 4 && !strncmp(cmd, "kill", 4)){
+    else if (!strncmp(cmd, "kill", 4)){
         
     }
     else if (!strncmp("$?", cmd, 2)) {
@@ -532,12 +568,6 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
             return EXIT_FAILURE;
         }
     }
-    else if (range == 5 && !strncmp(cmd, "test1", range)) { //template example
-        printf("echotest\n");
-    } 
-    else if (range == 5 && !strncmp(cmd, "test2", range)) { //template example
-        printf("echo 2 with parameters: '%s'.\n", mid + 1);
-    } 
     else return EXIT_FAILURE; //not an internal command
     return EXIT_SUCCESS; //Command was processed as internal
 }
@@ -549,7 +579,7 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
 	@param end 
 	@returns process return value
  */
-int cmdInterpreterExternal (char* cmd, char* end) {
+int cmdInterpreterExternal (char* cmd) {
 
     
     /*

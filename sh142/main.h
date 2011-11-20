@@ -5,12 +5,13 @@
 //  Created by Torkil Aamodt on 11/18/11.
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
+#include <iostream>
+#include <stdio.h>
 
 #ifndef sh142_main_h
 #define sh142_main_h
 
 #include "definitions.h"
-
 /* VARIABLES */
 static char* currentPath;
 static char* dataPath;
@@ -31,6 +32,11 @@ int getPastReturnValueAtIndex(int index);
 //Parsing
 int parseInput(char *inputCommand);
 int parsePipeCommand(char *command);
+int runForLoopParser(char *forLoop);
+int cmdInterpreter (char* cmd);
+int cmdInterpreterInternal (char* cmd);
+int cmdInterpreterExternal (char* cmd);
+
 
 void printPrompt(void);
 void init(void);
@@ -40,9 +46,7 @@ void loadConfig(char str1[], int c1, char str2[], int c2);
 int generateConfig(void);
 int putLnToFile(FILE* dest, char* key, char* val);
 void resetCommandBuffer(void);
-int cmdInterpreter (char* cmd);
-int cmdInterpreterInternal (char* cmd, char* mid, char* end);
-int cmdInterpreterExternal (char* cmd, char* end);
+
 
 // Environment Varaibles
 int setEnvironmentVariable(char* variable, char*operand);
