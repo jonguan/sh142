@@ -6,9 +6,8 @@
 //  Copyright (c) 2011 San Jose State University. All rights reserved.
 //
 
-//#include <iostream>
-//#include <unistd.h>
 #include "jobs.h"
+<<<<<<< HEAD
 //#include "main.h"
 
 int launchJob(char* cmd[], int mode, char* path, int flag)
@@ -71,21 +70,23 @@ int launchJob(char* cmd[], int mode, char* path, int flag)
     
     return 1;
 }
+=======
+>>>>>>> 0a16eca8255970db59c88632023948a08b7b8012
 
 void errormsg(char* c) {
     printf("Error: %s\n", c);
 }
 
-job* addJob(pid_t pid, pid_t pgid, char* jobName, int status) {
+job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status)
+{
     job *j = (job*) malloc(sizeof(job));
-    
     j->name = (char*) malloc(sizeof(jobName));
     j->name = strcpy(j->name, jobName);
     j->pid = pid;
     j->pgid = pgid;
     j->status = status;
-    //j->descriptor = (char*) malloc(sizeof(descritor));
-    //j->descriptor = strcpy(j->descriptor, descriptor);
+    j->descriptor = (char*) malloc(sizeof(descriptor));
+    j->descriptor = strcpy(j->descriptor, descriptor);
     j->next = NULL;
     
     if (jobList == NULL) {
@@ -103,20 +104,6 @@ job* addJob(pid_t pid, pid_t pgid, char* jobName, int status) {
         numberOfActiveJobs++;
         return jobList;
     }
-}
-
-
-int putIntoForeground(job* j) {
-    
-    return 0;
-}
-
-int putIntoBackground(job* j) {
-    
-    
-    
-    tcsetpgrp(SHELL_TERMINAL, j->pgid);
-    return 0;
 }
 
 void jobInit()
@@ -165,7 +152,7 @@ void childSignalHandler(int i)
         }
         if (WIFEXITED(status)) {
             if (job->status == BACKGROUND) {
-                printf("\nJob: ‰d Done\t ‰s\n", job->id, job->name);
+                printf("\nJob: ‰d Done\t ‰d\n", job->id, job->name);
                 jobList = deleteJob(job);
             }
         }
@@ -195,7 +182,8 @@ void childSignalHandler(int i)
     }
 }
 
-int setJobStatus(int pid, int newStatus) {
+int setJobStatus(int pid, int newStatus)
+{
     job *job = jobList;
     if (job == NULL) {
         return 0;
@@ -214,7 +202,8 @@ int setJobStatus(int pid, int newStatus) {
     }
 }
 
-job* deleteJob(job *j) {
+job* deleteJob(job *j)
+{
     if (jobList == NULL) {
         return NULL;
     }
@@ -240,7 +229,8 @@ job* deleteJob(job *j) {
     return jobList;
 }
 
-job* getJob(int value, int type) {
+job* getJob(int value, int type)
+{
     job *job = jobList;
     if (type == PROCESSID) {
         while (job != NULL) {
@@ -262,6 +252,16 @@ job* getJob(int value, int type) {
             }
         }
     }
+    else if (type == JOBSTATUS) {
+        while (job != NULL) {
+            if (job->status == value) {
+                return job;
+            }
+            else {
+                job = job->next;
+            }
+        }
+    }
     else {
         return NULL;
     }
@@ -269,7 +269,7 @@ job* getJob(int value, int type) {
 }
 
 
-/*
+
 void listJobs()
 {
     job *j = jobList;
@@ -277,16 +277,56 @@ void listJobs()
         printf("\nNO ACTIVE JOBS\n");
     } else {
         printf("\nACTIVE JOBS\n");
-        while job != NULL) {
-            printf("Job name: %7s 
+        while (j != NULL) {
+            printf("\nJob Number: %d\n", j->id);
+            printf("\t- Name: %s\n", j->name);
+            printf("\t- PID: %d\n", j->pid);
+            printf("\t- Status: %d\n", j->status);
+            printf("\t- Descriptor: %s\n\n", j->descriptor);
+            j = j->next;
         }
     }
-    
 }
-*/
 
+void setJobInBackground(job* j, int cont, bool bg)
+{
+    if (bg) {
+        if (j == NULL) {
+            return;
+        }
+        if (cont && j->status != WAITINGINPUT) {
+            j->status = WAITINGINPUT;
+        }
+        if (cont) {
+            if (kill(-j->pgid, SIGCONT) < 0) {
+                perror("error");
+            }
+        }
+        
+        tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
+    }
+    else {
+        j->status = FOREGROUND;
+        tcsetpgrp(SHELL_TERMINAL, j->pgid);
+        if (cont) {
+            if (kill(-j->pgid, SIGCONT) < 0) {
+                perror("error");
+            }
+        }
+        
+        waitJob(j);
+        tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
+    }
+}
 
-
-
-
+void waitJob(job* j)
+{
+    int status;
+    while (waitpid(j->pid, &status, WNOHANG) == 0) {
+        if (j->status == SUSPENDED) {
+            return;
+        }
+    }
+    jobList = deleteJob(j);
+}
 

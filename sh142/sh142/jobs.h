@@ -31,7 +31,7 @@ typedef struct job {
     pid_t pid;          // Process ID
     pid_t pgid;         // Process group ID
     int status;         // Status value
-    //char *descriptor;   // 
+    char *descriptor;   // Descriptor (hehe)
     struct job *next;   // Next active job
 } job;
 
@@ -47,15 +47,20 @@ static struct termios SHELL_TMODES;
 
 int launchJob(char* cmd[], int mode, char* path, int flag);
 void errormsg(char* c);
-int putIntoForeground(job* j);
-int putIntoBackground(job* j);
 
-job* addJob(pid_t pid, pid_t pgid, char* jobName, int status);
 
-void jobInit();
 void childSignalHandler(int i);
+void jobInit();
+int launchJob(char* cmd[]);
+void listJobs();
+
+job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status);
+>>>>>>> 0a16eca8255970db59c88632023948a08b7b8012
 int setJobStatus(int pid, int newStatus);
 job* deleteJob(job *job);
 job* getJob(int value, int type);
+
+void setJobInBackground(job* j,/* int cont,*/ bool bg);
+void waitJob(job* j);
 
 #endif

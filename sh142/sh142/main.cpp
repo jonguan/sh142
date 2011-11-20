@@ -37,6 +37,7 @@ void init() {
     saveCommandToHistory((char*)"-- no more commands --");
     
     printPrompt();
+<<<<<<< HEAD
     
     char **cmd;
     cmd[0] = (char*) "ls";
@@ -44,6 +45,8 @@ void init() {
     cmd[2] = NULL;
     
     launchJob(cmd, FOREGROUND, (char*)"DEFAULT", 0);
+=======
+>>>>>>> 0a16eca8255970db59c88632023948a08b7b8012
 }
 
 #pragma mark - Configuration methods
