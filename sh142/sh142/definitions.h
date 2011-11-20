@@ -16,6 +16,11 @@
 #include <termios.h>
 #include <ctype.h> /* isdigit */
 #include <curses.h> /* true and false*/
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <termios.h>
+#include <signal.h>
 
 
 #ifndef sh142_definitions_h
@@ -26,10 +31,6 @@
 #define NUM_REMEMBERED_CMDS 10
 //#define TRUE 1        //TRUE and FALSE already defined in curses.h
 //#define FALSE !TRUE
-#define FOREGROUND 'F'
-#define BACKGROUND 'B'
-#define SUSPENDED 'S'
-#define WAITING_INPUT 'W'
 #define EXIT (-1)
 #define UNINITIALIZED (-2)
 #define SIZE_PIPE_BUFFER 5000

@@ -13,11 +13,14 @@
 #include "jobs.h"
 #include "history.h"
 #include "main.h"
+<<<<<<< HEAD
 #include "forLoop.h"
 
 void error(char* c) {
     printf("Error: %s\n", c);
 }
+=======
+>>>>>>> b00b22c6404daa7166451442c2cdaf4fa7afda8f
 
 void printPrompt() {
     char *pathPtr = getcwd(currentPath, 1024);
@@ -25,8 +28,6 @@ void printPrompt() {
 }
 
 void init() {
-    //SHELL_PID = getpid();
-    
     // Initialize variables
     commandIdx = -1;
     command[0] = '\0';
@@ -41,7 +42,19 @@ void init() {
     readConfigFile();
     if (*promptSignature == '\0') promptSignature = (char*)"§";
     
+    saveCommandToHistory((char*)"-- no more commands --");
+    
     printPrompt();
+<<<<<<< HEAD
+    
+    char **cmd;
+    cmd[0] = (char*) "ls";
+    cmd[1] = (char*) "-la";
+    cmd[2] = NULL;
+    
+    launchJob(cmd, FOREGROUND, (char*)"DEFAULT", 0);
+=======
+>>>>>>> 0a16eca8255970db59c88632023948a08b7b8012
 }
 
 #pragma mark - Configuration methods
@@ -159,17 +172,29 @@ int main (int argc, const char * argv[])
 {
     init();
     while (1) {
-        //TODO: getKeyPress() doesn't work properly.
-        char c = fgetc(stdin);//getKeyPress();
+        //TODO: getKeyPress() doesn't work properly. I think.
+        char c = /*fgetc(stdin);*/ getKeyPress();
         
-        //Special case: retrieve previously entered command
-        //(Yup, -17, -100 and -128 all together makes the "arrow up"-button)
-        /*if (c == -17 && getKeyPress() == -100 && getKeyPress() == -128) {
-            loadPreviousCommandFromHistory();
-            //printf("%s", command);
+        //printf("pressed key: %d\n", c);
+        //continue;
+        
+        if (c == 127) { //Special case: Backspace
+            command[commandIdx--] = '\0';
             continue;
-        } else */if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
-            error((char*)"Command buffer is full.");
+        }
+        //Yup, -17, -100 and -128/-127 all together makes the arrow up/down-button
+        else if (c == -17 && getKeyPress() == -100) {
+            c = getKeyPress();
+            if (c == -128) { //Arrow Up hit
+                resetCommandBuffer();
+                loadPreviousCommandFromHistory(command, &commandIdx);
+            } else if (c == -127) { //Arrow Down hit
+                resetCommandBuffer();
+                loadNextCommandFromHistory(command, &commandIdx);
+            }
+            continue;
+        } else if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
+            perror((char*)"Command buffer is full.");
             resetCommandBuffer();
             printPrompt();
             continue;
@@ -180,6 +205,7 @@ int main (int argc, const char * argv[])
         //User hit return - replace \n with \0
         if (command[commandIdx] == '\n') { //The whole command is stored in command array
             command[commandIdx] = '\0';
+            saveCommandToHistory(command);
             
             
             
@@ -199,20 +225,32 @@ int main (int argc, const char * argv[])
 
 //TODO: This is basically ripped of teh internetz, needs rewriting.
 char getKeyPress() {
-    struct termios oldt, newt;
-    int ch;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    ch = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    return ch;
+    struct termios t, newT;
+    char c;
+    
+    tcgetattr(STDIN_FILENO, &t);
+    newT = t;
+    newT.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newT);
+    c = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &t);
+    
+    return c;
 }
 
 void resetCommandBuffer() {
-    commandIdx = -1;
     for (char* c = command; *c != '\0'; c++) *c = '\0';
+    
+    /*for (int i = commandIdx; i >= 0; i--) {
+        command[i] = '\0';
+        //printf("%c", '\b');
+        //printf("/b");
+        //printf( "%c[2J", 27 );
+    }*/
+    //int c;
+    //while ((c = getchar()) != '\n' && c != EOF);
+    //fpurge(stdin);
+    commandIdx = -1;
 }
 
 #pragma mark - Parser
@@ -486,7 +524,7 @@ int cmdInterpreterInternal (char* cmd, char* mid, char* end) {
     } else if (!strncmp(cmd, "DATA=", 5)) {
         setDataPath(cmd + 5, end);
     } else if (range == 5 && !strncmp(cmd, "test1", range)) { //template example
-        printf("echo 1\n");
+        printf("echotest\n");
     } else if (range == 5 && !strncmp(cmd, "test2", range)) { //template example
         printf("echo 2 with parameters: '%s'.\n", mid + 1);
     } else return 1;
@@ -527,7 +565,7 @@ int setExecPath(char* cmd, char* end) {
         printf("Executable path set as '%s'\n", execPath);
         return 0;
     } else {
-        error((char*)"Executable path was not set.");
+        perror((char*)"Executable path was not set.");
         return 1;
     }
 }
@@ -537,7 +575,7 @@ int setDataPath(char* cmd, char* end) {
         printf("Data path set as '%s'\n", dataPath);
         return 0;
     } else {
-        error((char*)"Datapath was not set.");
+        perror((char*)"Datapath was not set.");
         return 1;
     }
 }
