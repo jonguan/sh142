@@ -7,7 +7,6 @@
 //
 
 #include "history.h"
-#include <iostream>
 
 void loadPreviousCommandFromHistory(char dest[], int* cmdEnd) {
     //historyViewIdx = (historyViewIdx - 1) % CMD_HISTORY_LEN;

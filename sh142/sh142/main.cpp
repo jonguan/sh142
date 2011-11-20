@@ -14,11 +14,6 @@
 #include "history.h"
 #include "main.h"
 
-
-void error(char* c) {
-    printf("Error: %s\n", c);
-}
-
 void printPrompt() {
     char *pathPtr = getcwd(currentPath, 1024);
     printf("%s%s ", pathPtr, promptSignature);
@@ -43,11 +38,12 @@ void init() {
     
     printPrompt();
     
-    char **comd;
-    comd[0] = (char*) "ls";
-    comd[1] = (char*) "-la";
-    comd[2] = NULL;
-    launchJob(comd);
+    char **cmd;
+    cmd[0] = (char*) "ls";
+    cmd[1] = (char*) "-la";
+    cmd[2] = NULL;
+    
+    launchJob(cmd, FOREGROUND, (char*)"DEFAULT", 0);
 }
 
 #pragma mark - Configuration methods
@@ -187,7 +183,7 @@ int main (int argc, const char * argv[])
             }
             continue;
         } else if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
-            error((char*)"Command buffer is full.");
+            perror((char*)"Command buffer is full.");
             resetCommandBuffer();
             printPrompt();
             continue;
@@ -532,7 +528,7 @@ int setExecPath(char* cmd, char* end) {
         printf("Executable path set as '%s'\n", execPath);
         return 0;
     } else {
-        error((char*)"Executable path was not set.");
+        perror((char*)"Executable path was not set.");
         return 1;
     }
 }
@@ -542,7 +538,7 @@ int setDataPath(char* cmd, char* end) {
         printf("Data path set as '%s'\n", dataPath);
         return 0;
     } else {
-        error((char*)"Datapath was not set.");
+        perror((char*)"Datapath was not set.");
         return 1;
     }
 }

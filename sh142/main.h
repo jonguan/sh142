@@ -25,7 +25,6 @@ static int commandNumber; //Points to number of executed command
 /* PROTOTYPES */
 int parseInput(char *inputCommand);
 int parsePipeCommand(char *command);
-void error(char* c);
 void printPrompt(void);
 void init(void);
 char getKeyPress(void);

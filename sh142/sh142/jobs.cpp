@@ -11,9 +11,65 @@
 #include "jobs.h"
 //#include "main.h"
 
-int launchJob(char* cmd[])
+int launchJob(char* cmd[], int mode, char* path, int flag)
 {
-    return 0;
+    pid_t pid = fork();
+    
+    if (pid == -1) { //Error forking
+        errormsg((char*)"Failed to fork new process");
+    } else if (pid == 0) { //Child only
+        signal(SIGQUIT, SIG_DFL);
+        signal(SIGTTOU, SIG_DFL);
+        signal(SIGTTIN, SIG_DFL);
+        signal(SIGTSTP, SIG_DFL);
+        signal(SIGINT, SIG_DFL);
+        signal(SIGCHLD, &childSignalHandler);
+        //usleep(20000);
+        setpgrp();
+        
+        if (mode == FOREGROUND) {tcsetpgrp(SHELL_TERMINAL, getpid());}
+        else if (mode == BACKGROUND) {
+            printf("Job launched as process '%d'\n", getpid());
+            numberOfActiveJobs++;
+        }
+        
+        //Run the job
+        /*int descriptor;
+        if (flag == STDIN) {
+            descriptor = open(path, O_RDONLY, 0600);
+            dup2(descriptor, STDIN_FILENO);
+            close(descriptor);
+        }
+        if (flag == STDOUT) {
+            descriptor = open(path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+            dup2(descriptor, STDOUT_FILENO);
+            close(descriptor);
+        }*/
+        if (execvp(*cmd, cmd) == -1) perror("Failed to execute job");
+        
+        exit(EXIT_SUCCESS);
+        
+    } else { //Parent only
+        
+        setpgid(0, 0); //Will default to pid
+        if (getpgid(pid) != pid) { //TODO: Remove if when it works
+            printf("Change call 'setpgid(0, 0)' to 'setpgid(pid, pid)' in launchJob()");
+        }
+        
+        jobList = addJob(pid, pid, *cmd, mode);
+        job *j = getJob(pid, PROCESSID);
+        switch (mode) {
+            //case FOREGROUND: setJobInBackground(j, /*continue, */false); break;
+            //case BACKGROUND: setJobInBackground(j, /*continue, */true); break;    
+            default: break;
+        }
+        
+    }
+    
+    
+    
+    
+    return 1;
 }
 
 void errormsg(char* c) {
@@ -88,7 +144,7 @@ void jobInit()
             exit(EXIT_FAILURE);
         }
         if (tcsetpgrp(SHELL_TERMINAL, SHELL_PGID) == -1) {
-            //TODO: tcgetattr(SHELL_TERMINAL, &SHELL_TMODES);
+            tcgetattr(SHELL_TERMINAL, &SHELL_TMODES);
         }
         
     }

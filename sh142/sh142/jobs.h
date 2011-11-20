@@ -43,16 +43,17 @@ static pid_t SHELL_PGID;
 static int SHELL_TERMINAL;
 static int SHELL_IS_INTERACTIVE;
 
-//struct termios SHELL_TMODES;
+static struct termios SHELL_TMODES;
 
+int launchJob(char* cmd[], int mode, char* path, int flag);
 void errormsg(char* c);
-void childSignalHandler(int i);
-void jobInit();
-int launchJob(char* cmd[]);
 int putIntoForeground(job* j);
 int putIntoBackground(job* j);
 
 job* addJob(pid_t pid, pid_t pgid, char* jobName, int status);
+
+void jobInit();
+void childSignalHandler(int i);
 int setJobStatus(int pid, int newStatus);
 job* deleteJob(job *job);
 job* getJob(int value, int type);
