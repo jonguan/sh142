@@ -13,6 +13,7 @@
 
 #include "definitions.h"
 /* VARIABLES */
+
 static char* currentPath;
 static char* dataPath;
 static char* execPath;
@@ -36,7 +37,6 @@ int runForLoopParser(char *forLoop);
 int cmdInterpreter (char* cmd);
 int cmdInterpreterInternal (char* cmd);
 int cmdInterpreterExternal (char* cmd);
-
 
 void printPrompt(void);
 void init(void);

@@ -18,7 +18,10 @@ void printPrompt() {
     printf("%s%s ", pathPtr, promptSignature);
 }
 
+
 void init() {
+    shellInit();
+    
     // Initialize variables
     commandIdx = -1;
     command[0] = '\0';
@@ -37,13 +40,19 @@ void init() {
     
     printPrompt();
     
-    /*char *cmd[2];
-    cmd[0] = (char*) "emacs";
-    cmd[1] = (char*) NULL;
-    //cmd[2] = NULL;
     
-    launchJob(cmd, FOREGROUND, (char*)"DEFAULT", 0);
-    int launchJob(char* cmd[], int mode, char* path, int flag);*/
+    /*
+    char *cmd[3];
+    cmd[0] = (char*) "emacs";
+    //cmd[1] = (char*) "&";
+    cmd[1] = NULL;
+    
+    launchJob(cmd, BACKGROUND, (char*)"DEFAULT", 0);
+    listJobs();
+    killJob(1);
+    listJobs();
+    
+    */
 }
 
 #pragma mark - Configuration methods
@@ -162,7 +171,7 @@ int main (int argc, const char * argv[])
     init();
     while (1) {
         //TODO: getKeyPress() doesn't work properly. I think.
-        char c = /*fgetc(stdin);*/ getKeyPress();
+        char c = getchar();//fgetc(stdin); //getKeyPress();
         
         //printf("pressed key: %d\n", c);
         //continue;
@@ -172,7 +181,7 @@ int main (int argc, const char * argv[])
             continue;
         }
         //Yup, -17, -100 and -128/-127 all together makes the arrow up/down-button
-        else if (c == -17 && getKeyPress() == -100) {
+        /*else if (c == -17 && getKeyPress() == -100) {
             c = getKeyPress();
             if (c == -128) { //Arrow Up hit
                 resetCommandBuffer();
@@ -182,7 +191,7 @@ int main (int argc, const char * argv[])
                 loadNextCommandFromHistory(command, &commandIdx);
             }
             continue;
-        } else if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
+        }*/ else if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
             perror((char*)"Command buffer is full.");
             resetCommandBuffer();
             printPrompt();
@@ -554,11 +563,17 @@ int cmdInterpreterInternal (char* cmd) {
     }
     else if (!strncmp(cmd, "kill", 4)){
         char *number = strtok(cmd, "kill ");
+        if (number == NULL) {
+            return 0;
+        }
         int n = atoi(number);
         killJob(n);
     }
     else if(!strncmp(cmd, "fg", 2)) {
-        
+        char *number = strtok(cmd, "fg ");
+        if (number == NULL) {
+            return 0;
+        }
     }
     else if (!strncmp(cmd, "bg", 2)) {
         
