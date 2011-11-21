@@ -12,6 +12,10 @@
 #define sh142_main_h
 
 #include "definitions.h"
+#include "pipe.h"
+#include "jobs.h"
+#include "history.h"
+
 /* VARIABLES */
 
 static char* currentPath;
@@ -23,6 +27,8 @@ static char* promptSignature;
 FILE *configFile;
 static int exitStatusArray[NUM_REMEMBERED_CMDS];
 static int commandNumber; //Points to number of executed command
+
+
 
 /* PROTOTYPES */
 //Exit status
@@ -55,5 +61,8 @@ int setDataPath(char* cmd);
 int setPath(char* cmd, char* p);
 int validatePaths(char* pathList);
 
-
+// Hash table
+void add_var(struct envVar *var);
+struct envVar *find_var(char* varName); 
+void delete_var(struct envVar *var);
 #endif

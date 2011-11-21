@@ -44,6 +44,16 @@ void shellInit()
 }
 
 
+static int numberOfActiveJobs = 0;
+static job* jobList = NULL;
+
+static pid_t SHELL_PID;
+static pid_t SHELL_PGID;
+static int SHELL_TERMINAL;
+static int SHELL_IS_INTERACTIVE;
+
+static struct termios SHELL_TMODES;
+
 /**
 	launchJob
 	@param cmd - array of strings from command where cmd[0] = command name and all else are descriptors

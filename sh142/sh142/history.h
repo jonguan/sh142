@@ -11,11 +11,6 @@
 
 #include "definitions.h"
 
-static char cmdHistory[CMD_HISTORY_LEN][CMD_LEN];
-static int historyIdx; //Points to where in history to put next entered command
-static int historyViewIdx; //Points to which command in history to view next when arrow-keys are pressed
-static int numEntries;
-
 void loadPreviousCommandFromHistory(char dest[], int* cmdEnd);
 void loadNextCommandFromHistory(char dest[], int* cmdEnd);
 void loadCommandFromHistory(char dest[], int* cmdEnd, int idx);
