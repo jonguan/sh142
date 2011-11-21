@@ -423,6 +423,8 @@ int parsePipeCommand(char *command)
 // returns exit status; upon return, forLoop will be set to the command input after forend, or NULL if finished
 int runForLoopParser(char *forLoop)
 {
+    int returnValue = UNINITIALIZED;
+    int numOpenBrace = 0;
     char *loopPtr = forLoop;
     
     //assume for loop is given in entirety
@@ -434,9 +436,30 @@ int runForLoopParser(char *forLoop)
             return EXIT_SUCCESS;
         }  
         // nested for loop
-        else if(!strncmp(loopPtr, "for ", 3) || !strncmp(loopPtr, "for(", 4)){
+        else if(!strncmp(loopPtr, "for ", 4) || !strncmp(loopPtr, "for(", 4)){
+            returnValue = runForLoopParser(loopPtr);
             
         }
+        else if(*loopPtr == '('){
+            // set operands
+            numOpenBrace++;
+            char *braceOperans = strcpy(braceOperans, loopPtr);
+            char *token = strtok(braceOperans, ";");
+            if (token == NULL) {
+                //print command prompt for more input
+            }else if (strstr(token, "=") == NULL){
+                // ERROR - first command needs to have =
+                *forLoop = '\0';
+                return EXIT_FAILURE;
+            }else{
+                // give to cmd to evaluate
+                cmdInterpreter(token);
+            }
+            
+            char *middle = strtok(NULL, ";");
+            char *end = strtok(NULL, ")");
+        }
+        
     }
     
     //size_t forLength = strlen(forLoop);

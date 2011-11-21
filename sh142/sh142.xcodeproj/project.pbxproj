@@ -73,10 +73,7 @@
 		B880B3E414770C26004E49A8 /* sh142 */ = {
 			isa = PBXGroup;
 			children = (
-				F49E61FE1479FCD900FAAEAF /* utarray.h */,
-				F49E61FF1479FCD900FAAEAF /* uthash.h */,
-				F49E62001479FCD900FAAEAF /* utlist.h */,
-				F49E62011479FCD900FAAEAF /* utstring.h */,
+				F49E6206147A042800FAAEAF /* hash */,
 				B880B3EE14770C83004E49A8 /* definitions.h */,
 				F49E61F81479F8A400FAAEAF /* main.h */,
 				B880B3E514770C26004E49A8 /* main.cpp */,
@@ -89,6 +86,17 @@
 				F42C2FA21478AEDD0011A6CF /* Tests.sh */,
 			);
 			path = sh142;
+			sourceTree = "<group>";
+		};
+		F49E6206147A042800FAAEAF /* hash */ = {
+			isa = PBXGroup;
+			children = (
+				F49E61FE1479FCD900FAAEAF /* utarray.h */,
+				F49E61FF1479FCD900FAAEAF /* uthash.h */,
+				F49E62001479FCD900FAAEAF /* utlist.h */,
+				F49E62011479FCD900FAAEAF /* utstring.h */,
+			);
+			name = hash;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
