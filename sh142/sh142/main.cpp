@@ -11,8 +11,40 @@
 #include "pipe.h"
 #include "jobs.h"
 #include "history.h"
-//#include "forLoop.h"
+#include "uthash.h"
 
+#pragma mark - Hash Table
+#include "uthash.h"
+
+struct envVar {
+    char name[15];             /* we'll use this field as the key */
+    size_t value;
+    UT_hash_handle hh; /* makes this structure hashable */
+};
+
+static struct envVar *sh142Vars = NULL;
+
+void add_var(struct envVar *var) 
+{
+    HASH_ADD_STR(sh142Vars, name, var);
+}
+
+struct envVar *find_var(char* varName) 
+{
+    struct envVar *varPtr = NULL;
+    HASH_FIND_STR(sh142Vars, varName, varPtr);
+    return varPtr;
+}
+
+
+void delete_var(struct envVar *var) 
+{
+    HASH_DEL( sh142Vars, var);  
+}
+
+
+
+#pragma mark - main
 void printPrompt() {
     char *pathPtr = getcwd(currentPath, 1024);
     printf("%s%s ", pathPtr, promptSignature);
@@ -394,13 +426,22 @@ int parsePipeCommand(char *command)
 // returns exit status; upon return, forLoop will be set to the command input after forend, or NULL if finished
 int runForLoopParser(char *forLoop)
 {
-    char *c = forLoop;
+    char *loopPtr = forLoop;
     
     //assume for loop is given in entirety
-    if (!strncmp(forLoop, "for", 3)) {
-        c+=3;
-        
+    while (*loopPtr != '\0') {
+        if (!strncmp(loopPtr, "forend", 6)) {
+            //done
+            loopPtr+=6;
+            forLoop = loopPtr;
+            return EXIT_SUCCESS;
+        }  
+        // nested for loop
+        else if(!strncmp(loopPtr, "for ", 3) || !strncmp(loopPtr, "for(", 4)){
+            
+        }
     }
+    
     //size_t forLength = strlen(forLoop);
     while (1) {
         char c = /*fgetc(stdin);*/ getKeyPress();
@@ -490,19 +531,39 @@ int cmdInterpreter (char* cmd) {
             // get next process to pass results
             c++;
             subcommand = c;
-        }
-        else if (*c == '=' && isalpha(*subcommand)){
+        } else if (*c == '=' && isalnum(*subcommand)){
             //Environment variable
             *c = '\0';
             c++;
             //get operand 
-            char *restOfString = strcpy(restOfString, c);
+            char restOfString[40];
+            strcpy(restOfString, c);
             char *operand = strtok(restOfString, " ;");
-            setEnvironmentVariable(subcommand, operand);
+            returnValue = setEnvironmentVariable(subcommand, operand);
             
             c+= strlen(operand);
             subcommand = c;
-        }else{
+        } else if (*c == '$' && strncmp("$?", c, 2)){
+            //testing purposes here
+            //get operand 
+            c++;
+            char restOfString[40];
+            strcpy(restOfString, c);
+            char *operand = strtok(restOfString, " ;");
+
+            envVar *head = sh142Vars;
+            struct envVar *var = find_var(operand);
+
+            
+            if (var != NULL) {
+                printf("%lu", var->value);                
+            }else{
+                printf("%s not found", operand);
+                return EXIT_FAILURE;
+            }
+            return EXIT_SUCCESS;
+        }
+        else{
             c++;
         }
         
@@ -583,6 +644,7 @@ int cmdInterpreterInternal (char* cmd) {
             return EXIT_FAILURE;
         }
     }
+   
     else return EXIT_FAILURE; //not an internal command
     return EXIT_SUCCESS; //Command was processed as internal
 }
@@ -648,11 +710,29 @@ int setEnvironmentVariable(char* variable, char*operand){
     } 
     else if (!strncmp(variable, "DATA", 4)) {
         setDataPath(operand);
-    }else if(*variable >= 'A' && *variable <= 'Z'){
-        //Capital letter only
-        // insert into linked list?
+    }else if (isalnum(*variable)) /*if(*variable >= 'A' && *variable <= 'Z')*/
+    {
+        struct envVar *v = find_var(variable);
+        int val = atoi(operand);
         
-        // need to write a getter and a setter, and also how to delete
+        if (v != NULL) {
+            v->value = val;
+        }else{
+            // insert into hash table
+            struct envVar *s = (envVar*)malloc(sizeof(struct envVar) +1);
+            s->value = atoi(operand);
+            strcpy(s->name, variable);
+            add_var(s);
+            
+            //HASH_ADD_STR(sh142Vars, name, s);
+            
+            /*
+            envVar newVar;
+            newVar.name = variable;
+            newVar.value = atoi(operand);
+            v = &newVar;
+            add_var(v); */ 
+        }
         
     }
 
