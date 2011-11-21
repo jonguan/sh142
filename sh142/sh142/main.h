@@ -12,6 +12,10 @@
 #define sh142_main_h
 
 #include "definitions.h"
+#include "pipe.h"
+#include "jobs.h"
+#include "history.h"
+
 /* VARIABLES */
 static char* currentPath;
 static char* dataPath;

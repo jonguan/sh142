@@ -8,13 +8,10 @@
 
 
 #include "main.h"
-#include "pipe.h"
-#include "jobs.h"
-#include "history.h"
-#include "uthash.h"
+
+//#include "uthash.h"
 
 #pragma mark - Hash Table
-#include "uthash.h"
 
 struct envVar {
     char name[15];             /* we'll use this field as the key */
@@ -551,7 +548,6 @@ int cmdInterpreter (char* cmd) {
             strcpy(restOfString, c);
             char *operand = strtok(restOfString, " ;");
 
-            envVar *head = sh142Vars;
             struct envVar *var = find_var(operand);
 
             

@@ -36,11 +36,11 @@
 		B8B9C35314773D05002C04B2 /* history.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = history.cpp; sourceTree = "<group>"; };
 		B8B9C35614773D1D002C04B2 /* history.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = history.h; sourceTree = "<group>"; };
 		F42C2FA21478AEDD0011A6CF /* Tests.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = Tests.sh; sourceTree = "<group>"; };
-		F49E61E81479CC5100FAAEAF /* utarray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utarray.h; sourceTree = "<group>"; };
-		F49E61E91479CC5100FAAEAF /* uthash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uthash.h; sourceTree = "<group>"; };
-		F49E61EA1479CC5100FAAEAF /* utlist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utlist.h; sourceTree = "<group>"; };
-		F49E61EB1479CC5100FAAEAF /* utstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utstring.h; sourceTree = "<group>"; };
 		F49E61F81479F8A400FAAEAF /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
+		F49E61FE1479FCD900FAAEAF /* utarray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utarray.h; sourceTree = "<group>"; };
+		F49E61FF1479FCD900FAAEAF /* uthash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uthash.h; sourceTree = "<group>"; };
+		F49E62001479FCD900FAAEAF /* utlist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utlist.h; sourceTree = "<group>"; };
+		F49E62011479FCD900FAAEAF /* utstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utstring.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,7 +73,10 @@
 		B880B3E414770C26004E49A8 /* sh142 */ = {
 			isa = PBXGroup;
 			children = (
-				F49E61E71479CC5100FAAEAF /* hash */,
+				F49E61FE1479FCD900FAAEAF /* utarray.h */,
+				F49E61FF1479FCD900FAAEAF /* uthash.h */,
+				F49E62001479FCD900FAAEAF /* utlist.h */,
+				F49E62011479FCD900FAAEAF /* utstring.h */,
 				B880B3EE14770C83004E49A8 /* definitions.h */,
 				F49E61F81479F8A400FAAEAF /* main.h */,
 				B880B3E514770C26004E49A8 /* main.cpp */,
@@ -86,17 +89,6 @@
 				F42C2FA21478AEDD0011A6CF /* Tests.sh */,
 			);
 			path = sh142;
-			sourceTree = "<group>";
-		};
-		F49E61E71479CC5100FAAEAF /* hash */ = {
-			isa = PBXGroup;
-			children = (
-				F49E61E81479CC5100FAAEAF /* utarray.h */,
-				F49E61E91479CC5100FAAEAF /* uthash.h */,
-				F49E61EA1479CC5100FAAEAF /* utlist.h */,
-				F49E61EB1479CC5100FAAEAF /* utstring.h */,
-			);
-			path = hash;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
