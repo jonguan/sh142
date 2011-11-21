@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8BF8E32D147A09DC006EE752 /* jobs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3F71477151D004E49A8 /* jobs.cpp */; };
 		B880B3E614770C26004E49A8 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3E514770C26004E49A8 /* main.cpp */; };
 		B880B3F6147714A2004E49A8 /* pipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3F5147714A2004E49A8 /* pipe.cpp */; };
-		B880B3F81477151D004E49A8 /* jobs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3F71477151D004E49A8 /* jobs.cpp */; };
 		B8B9C35414773D05002C04B2 /* history.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8B9C35314773D05002C04B2 /* history.cpp */; };
 /* End PBXBuildFile section */
 
@@ -135,8 +135,8 @@
 			files = (
 				B880B3E614770C26004E49A8 /* main.cpp in Sources */,
 				B880B3F6147714A2004E49A8 /* pipe.cpp in Sources */,
-				B880B3F81477151D004E49A8 /* jobs.cpp in Sources */,
 				B8B9C35414773D05002C04B2 /* history.cpp in Sources */,
+				8BF8E32D147A09DC006EE752 /* jobs.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
