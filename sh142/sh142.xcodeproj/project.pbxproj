@@ -10,6 +10,7 @@
 		8BF8E32D147A09DC006EE752 /* jobs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3F71477151D004E49A8 /* jobs.cpp */; };
 		B880B3E614770C26004E49A8 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3E514770C26004E49A8 /* main.cpp */; };
 		B880B3F6147714A2004E49A8 /* pipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B880B3F5147714A2004E49A8 /* pipe.cpp */; };
+		B886CCA1147C22DD00BC94A4 /* scheduler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B886CCA0147C22DD00BC94A4 /* scheduler.cpp */; };
 		B8B9C35414773D05002C04B2 /* history.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8B9C35314773D05002C04B2 /* history.cpp */; };
 /* End PBXBuildFile section */
 
@@ -33,6 +34,8 @@
 		B880B3F214770C83004E49A8 /* pipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pipe.h; sourceTree = "<group>"; };
 		B880B3F5147714A2004E49A8 /* pipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pipe.cpp; sourceTree = "<group>"; };
 		B880B3F71477151D004E49A8 /* jobs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jobs.cpp; sourceTree = "<group>"; };
+		B886CC9F147C22DD00BC94A4 /* scheduler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scheduler.h; sourceTree = "<group>"; };
+		B886CCA0147C22DD00BC94A4 /* scheduler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scheduler.cpp; sourceTree = "<group>"; };
 		B8B9C35314773D05002C04B2 /* history.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = history.cpp; sourceTree = "<group>"; };
 		B8B9C35614773D1D002C04B2 /* history.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = history.h; sourceTree = "<group>"; };
 		F42C2FA21478AEDD0011A6CF /* Tests.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = Tests.sh; sourceTree = "<group>"; };
@@ -77,6 +80,8 @@
 				B880B3EE14770C83004E49A8 /* definitions.h */,
 				F49E61F81479F8A400FAAEAF /* main.h */,
 				B880B3E514770C26004E49A8 /* main.cpp */,
+				B886CC9F147C22DD00BC94A4 /* scheduler.h */,
+				B886CCA0147C22DD00BC94A4 /* scheduler.cpp */,
 				B8B9C35614773D1D002C04B2 /* history.h */,
 				B8B9C35314773D05002C04B2 /* history.cpp */,
 				B880B3F214770C83004E49A8 /* pipe.h */,
@@ -153,6 +158,7 @@
 				B880B3F6147714A2004E49A8 /* pipe.cpp in Sources */,
 				B8B9C35414773D05002C04B2 /* history.cpp in Sources */,
 				8BF8E32D147A09DC006EE752 /* jobs.cpp in Sources */,
+				B886CCA1147C22DD00BC94A4 /* scheduler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

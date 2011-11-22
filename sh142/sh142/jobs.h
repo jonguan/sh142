@@ -32,6 +32,8 @@ typedef struct job {
     pid_t pgid;         // Process group ID
     long lastChecked;        //Time since last check by scheduler
     time_t timeOverCpuLimit;//Time process spent preceding CPU usage limit
+    time_t timeOverMemLimit;//Time process spent preceding memory usage limit
+    time_t timeAlive;       //Time the job has been alive in total
     int status;         // Status value
     char *descriptor;   // Descriptor
     struct job *next;   // Next active job

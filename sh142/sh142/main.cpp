@@ -86,17 +86,20 @@ void init() {
     //TORKIL'S TEST AREA
     
     //Thread will not work on mac!
-   // pthread_create(&schedThread, NULL, restrictProcesses, NULL);
+    //setMemMax((char*)"MEMMAX=1337M:125");
+    pthread_create(&schedThread, NULL, restrictProcesses, NULL);
     
-    /*job j;
-     j.pid = 600;
-     j.lastChecked = time(NULL);
-     j.timeOverCpuLimit = 0;
-    jobList = &j;
-     while (1) {
-     sleep(2);
-     checkOnProcess(j);
-     }*/
+     //job j;
+     //j.pid = 600;
+     //j.lastChecked = time(NULL);
+     //j.timeOverCpuLimit = 0;
+     //jobList = &j;
+     //while (1) {
+     //    printf("MEM:%d\tSEC:%d\n", memLimit, memTime);
+     //    setMemMax((char*)"MEMMAX=1337M:125");
+     //sleep(2);
+     //checkOnProcess(j);
+     //}
     
     //END TORKIL'S TEST AREA
 }
@@ -799,7 +802,21 @@ int cmdInterpreterInternal (char* cmd) {
             return EXIT_FAILURE;
         }
     }
-   
+    else if (!strncmp(cmd, "CPUMAX=", 7)) {
+        if (setCpuMax(cmd)) {
+            printf("Failed to set max CPU\n");
+        }
+    }
+    else if (!strncmp(cmd, "MEMMAX=", 7)) {
+        if (setMemMax(cmd)) {
+        }
+    }
+    else if (!strncmp(cmd, "TIMEMAX=", 8)) {
+        if (setTimeMax(cmd)) {
+            printf("\nFailed to set max time\n\n");
+        }
+    }
+    
     else return EXIT_FAILURE; //not an internal command
     return EXIT_SUCCESS; //Command was processed as internal
 }
