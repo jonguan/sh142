@@ -44,6 +44,8 @@ int cmdInterpreter (char* cmd);
 int cmdInterpreterInternal (char* cmd);
 int cmdInterpreterExternal (char* cmd);
 
+void tester(void);
+
 void printPrompt(void);
 void init(void);
 char getKeyPress(void);

@@ -35,11 +35,23 @@ typedef struct job {
     struct job *next;   // Next active job
 } job;
 
+static int numberOfActiveJobs = 0;
+static job* jobList = NULL;
 
+static pid_t SHELL_PID;
+static pid_t SHELL_PGID;
+static int SHELL_TERMINAL;
+static int SHELL_IS_INTERACTIVE;
+static struct termios SHELL_TMODES;
 
-int launchJob(char* cmd[], int mode, char* path, int flag);
+void newShellInit(void);
+
+//int launchJob(char* cmd[], int mode, char* path, int flag);
+
+int launchJob(char* cmd[], char* path, int flag, int mode);
+
 void errormsg(char* c);
-
+    
 void childSignalHandler(int i);
 void shellInit();
 void listJobs();
@@ -53,8 +65,5 @@ void setJobInBackground(job* j, int cont, bool bg);
 void waitJob(job* j);
 void killJob(int id);
 
-void jobToForeground(job *j, int cont);
-
-void jobToBackground(job *j, int cont);
-
+void signalHandler_child(int p);
 #endif

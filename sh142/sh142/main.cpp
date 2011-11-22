@@ -48,8 +48,21 @@ void printPrompt() {
 }
 
 
+/*void tester() {
+    char *cmd[3];
+    cmd[0] = (char*) "vim";
+    //cmd[1] = (char*) "&";
+    cmd[1] = NULL;
+    
+    launchJob(cmd, BACKGROUND, (char*)"DEFAULT", 0);
+    listJobs();
+    killJob(1);
+    listJobs();
+}*/
+
 void init() {
-    shellInit();
+    //shellInit();
+    newShellInit();
     
     // Initialize variables
     commandIdx = -1;
@@ -69,19 +82,7 @@ void init() {
     
     printPrompt();
     
-    
-    /*
-    char *cmd[3];
-    cmd[0] = (char*) "emacs";
-    //cmd[1] = (char*) "&";
-    cmd[1] = NULL;
-    
-    launchJob(cmd, BACKGROUND, (char*)"DEFAULT", 0);
-    listJobs();
-    killJob(1);
-    listJobs();
-    
-    */
+    //tester();
 }
 
 #pragma mark - Configuration methods
@@ -637,26 +638,37 @@ int cmdInterpreterInternal (char* cmd) {
     }
     else if (!strncmp(cmd, "exit", 4)) {
         return -1;
-    } 
+    }
+    else if(!strncmp(cmd, "hest", 2)) {
+        printf("\nHAEHAEHAEHAEHAEHAEHAEHAEHHAE\n");
+        char *number = strtok(cmd, "hest ");
+        if (number != NULL) {
+            int n = atoi(number);
+            job *j = getJob(n, JOBID);
+            if (j == NULL) {
+                return 0;
+            }
+            if (j->status == SUSPENDED || j->status == WAITINGINPUT) {
+                setJobInBackground(j, TRUE, false);
+            }
+            else {
+                setJobInBackground(j, FALSE, false);
+            }
+        }
+        return 0;
+    }
     else if (!strncmp(cmd, "jobs", 4)){
         listJobs();
     }
     else if (!strncmp(cmd, "kill", 4)){
         char *number = strtok(cmd, "kill ");
-        if (number == NULL) {
-            return 0;
+        if (number != NULL) {
+            int n = atoi(number);
+            killJob(n);
+            //job *j = getJob(n, JOBID);
+            //deleteJob(j);
         }
-        int n = atoi(number);
-        killJob(n);
-    }
-    else if(!strncmp(cmd, "fg", 2)) {
-        char *number = strtok(cmd, "fg ");
-        if (number == NULL) {
-            return 0;
-        }
-    }
-    else if (!strncmp(cmd, "bg", 2)) {
-        
+        return 0;
     }
     else if (!strncmp("$?", cmd, 2)) {
         // exit status history
@@ -732,7 +744,10 @@ int cmdInterpreterExternal (char* cmd) {
     if (tokens[0] != NULL) {
         flag = 1;
     }
-    return launchJob(tokens, mode, (char*)"DEFAULT", flag);
+    
+    launchJob(tokens, (char*)"DEFAULT", flag, mode);
+    return 0;
+    //return launchJob(tokens, mode, (char*)"DEFAULT", flag);
     
 }
 
@@ -829,4 +844,3 @@ int validatePaths(char* pathList) {
     }
     return foundErrors;
 }
-
