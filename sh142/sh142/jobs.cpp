@@ -146,6 +146,8 @@ job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status)
     j->pgid = pgid;
     j->lastChecked = time(NULL);
     j->timeOverCpuLimit = 0;
+    j->timeAlive = 0;
+    j->timeOverMemLimit = 0;
     j->status = status;
     j->descriptor = (char*) malloc(sizeof(descriptor));
     j->descriptor = strcpy(j->descriptor, descriptor);
