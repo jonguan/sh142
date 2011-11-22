@@ -29,4 +29,6 @@ int setTimeMax(char* cmd);
 int setMemMax(char* cmd);
 int setCpuMax(char* cmd);
 
+int fileExists(char* path);
+
 #endif
