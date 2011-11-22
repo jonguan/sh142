@@ -61,8 +61,7 @@ void printPrompt() {
 }*/
 
 void init() {
-    //shellInit();
-    newShellInit();
+    shellInit();
     
     // Initialize variables
     commandIdx = -1;
@@ -688,9 +687,8 @@ int cmdInterpreterInternal (char* cmd) {
     else if (!strncmp(cmd, "exit", 4)) {
         return -1;
     }
-    else if(!strncmp(cmd, "hest", 2)) {
-        printf("\nHAEHAEHAEHAEHAEHAEHAEHAEHHAE\n");
-        char *number = strtok(cmd, "hest ");
+    else if(!strncmp(cmd, "fg", 2)) {
+        char *number = strtok(cmd, "fg ");
         if (number != NULL) {
             int n = atoi(number);
             job *j = getJob(n, JOBID);
@@ -714,8 +712,7 @@ int cmdInterpreterInternal (char* cmd) {
         if (number != NULL) {
             int n = atoi(number);
             killJob(n);
-            //job *j = getJob(n, JOBID);
-            //deleteJob(j);
+
         }
         return 0;
     }
