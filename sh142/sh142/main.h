@@ -28,7 +28,20 @@ FILE *configFile;
 static int exitStatusArray[NUM_REMEMBERED_CMDS];
 static int commandNumber; //Points to number of executed command
 
+typedef enum{
+    GREATER_THAN = 0,
+    GREATER_THAN_EQUAL,
+    LESS_THAN,
+    LESS_THAN_EQUAL,
+    EQUIVALENT
+}Comparison;
 
+typedef enum{
+    PLUS_ONE = 0,
+    PLUS_EQUAL,
+    MINUS_ONE,
+    MINUS_EQUAL
+}Operation;
 
 /* PROTOTYPES */
 //Exit status
@@ -57,6 +70,7 @@ void resetCommandBuffer(void);
 
 
 // Environment Varaibles
+int evaluateEnvVariable(char *expression);
 int setEnvironmentVariable(char* variable, char*operand);
 int setExecPath(char* cmd);
 int setDataPath(char* cmd);
