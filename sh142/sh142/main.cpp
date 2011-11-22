@@ -849,9 +849,10 @@ int cmdInterpreterExternal (char* cmd) {
     tokens[i] = '\0';
 
     
-    int flag = 0;
+
+    int flag = -1;
     if (tokens[0] != NULL) {
-        flag = STDIN;
+        //flag = STDIN;
     }
     
     /*
@@ -862,7 +863,8 @@ int cmdInterpreterExternal (char* cmd) {
      @param flag - STDIN or STDOUT
      */
     launchJob(tokens, (char*)"DEFAULT", flag, mode);
-    return 0;
+    return EXIT_SUCCESS;
+
     //return launchJob(tokens, mode, (char*)"DEFAULT", flag);
     
 }

@@ -51,6 +51,7 @@ int launchJob(char* cmd[], char* path, int flag, int mode);
 job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status);
 void childSignalHandler(int i);
 void setJobInBackground(job* j, int cont, bool bg);
+//void setJobInBackground(job* j, int cont, bool bg, char* path, int rw);
 void errormsg(char* c);
 int setJobStatus(int pid, int newStatus);
 job* deleteJob(job *job);
@@ -59,5 +60,8 @@ void waitForJob(job* j);
 job* getJobList(void);
 void killJob(int id);
 void listJobs(void);
+void putToBackground(job* j);
+
+int launchBackgroundJob(char* cmd[], char* path, int flag);
 
 #endif
