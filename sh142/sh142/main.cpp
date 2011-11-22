@@ -48,17 +48,17 @@ void printPrompt() {
 }
 
 
-/*void tester() {
+void tester() {
     char *cmd[3];
-    cmd[0] = (char*) "vim";
+    cmd[0] = (char*) "emacs";
     //cmd[1] = (char*) "&";
     cmd[1] = NULL;
     
-    launchJob(cmd, BACKGROUND, (char*)"DEFAULT", 0);
-    listJobs();
-    killJob(1);
-    listJobs();
-}*/
+    launchJob(cmd, (char*)"DEFAULT", 1, BACKGROUND);
+    //listJobs();
+    //killJob(1);
+    //listJobs();
+}
 
 void init() {
     shellInit();
