@@ -258,3 +258,7 @@ int runSubCommand(char *subCommand){
     return 0;
     
 }
+
+int redirectToFile (char *fileName){
+    return EXIT_SUCCESS;
+}

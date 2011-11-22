@@ -16,8 +16,10 @@
 #define SUSPENDED 'S'
 #define WAITINGINPUT 'W'
 
-#define STDIN 1
-#define STDOUT 2
+#define STDIN 0
+#define STDOUT 1
+#define STDERR 2
+#define STDINOUT 3
 
 #define PROCESSID 1
 #define JOBID 2

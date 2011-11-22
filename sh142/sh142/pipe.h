@@ -18,4 +18,7 @@ int runSubCommand(char*subCommand);
 int runPipeCommand(char* inCommand, char* outCommand);
 int runPipeReadCommand(char *command, char*result); // read from stdin, writes to result
 int runPipeWriteCommand(char *command, char* inputString, char* result);//Reads from inputFile, passes to command, writes into result
+
+// Redirect STDIN and STDOUT
+int redirectToFile (char *fileName);
 #endif

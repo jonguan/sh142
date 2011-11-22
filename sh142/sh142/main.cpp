@@ -699,6 +699,9 @@ int cmdInterpreter (char* cmd) {
                 return EXIT_FAILURE;
             }
             return EXIT_SUCCESS;
+        } else if (*c == '>' || *c == '<' || !strncmp(c, "2>", 2)){
+            // stdin and stdout and stderr redirection
+            
         }
         else{
             c++;
@@ -834,13 +837,13 @@ int cmdInterpreterExternal (char* cmd) {
         mode = FOREGROUND; 
     }
         
-    char *token = strtok(cmd, " ");
+    char *token = strtok(cmd, " &");
     char *tokens[20];
     int i = 0;
     while (token != NULL) {
         tokens[i] = token;
         i++;
-        token = strtok(NULL, " ");
+        token = strtok(NULL, " &");
         //tokens+=1;
     }
     tokens[i] = '\0';
@@ -848,9 +851,16 @@ int cmdInterpreterExternal (char* cmd) {
     
     int flag = 0;
     if (tokens[0] != NULL) {
-        flag = 1;
+        flag = STDIN;
     }
     
+    /*
+     launchJob
+     @param cmd - array of strings from command where cmd[0] = command name and all else are descriptors
+     @param mode - FOREGROUND or BACKGROUND
+     @param path - path to a file
+     @param flag - STDIN or STDOUT
+     */
     launchJob(tokens, (char*)"DEFAULT", flag, mode);
     return 0;
     //return launchJob(tokens, mode, (char*)"DEFAULT", flag);
