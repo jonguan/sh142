@@ -30,6 +30,8 @@ typedef struct job {
     char *name;         // 
     pid_t pid;          // Process ID
     pid_t pgid;         // Process group ID
+    long lastChecked;        //Time since last check by scheduler
+    time_t timeOverCpuLimit;//Time process spent preceding CPU usage limit
     int status;         // Status value
     char *descriptor;   // Descriptor (hehe)
     struct job *next;   // Next active job
@@ -60,6 +62,7 @@ job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status);
 int setJobStatus(int pid, int newStatus);
 job* deleteJob(job *job);
 job* getJob(int value, int type);
+job* getJobList(void);
 
 void setJobInBackground(job* j, int cont, bool bg);
 void waitJob(job* j);

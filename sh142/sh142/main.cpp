@@ -83,6 +83,22 @@ void init() {
     printPrompt();
     
     //tester();
+    
+    //TORKIL'S TEST AREA
+    
+    //Thread will not work on mac!
+    pthread_create(&schedThread, NULL, restrictProcesses, NULL);
+    
+    /*job j;
+     j.pid = 600;
+     j.lastChecked = time(NULL);
+     j.timeOverCpuLimit = 0;
+     while (1) {
+     sleep(2);
+     checkOnProcess(j);
+     }*/
+    
+    //END TORKIL'S TEST AREA
 }
 
 #pragma mark - Configuration methods
@@ -245,21 +261,6 @@ int main (int argc, const char * argv[])
         }
     }
     return EXIT_SUCCESS;
-}
-
-//TODO: This is basically ripped of teh internetz, needs rewriting.
-char getKeyPress() {
-    struct termios t, newT;
-    char c;
-    
-    tcgetattr(STDIN_FILENO, &t);
-    newT = t;
-    newT.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newT);
-    c = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &t);
-    
-    return c;
 }
 
 void resetCommandBuffer() {
@@ -527,7 +528,7 @@ int runForLoopParser(char *forLoop)
     
     //size_t forLength = strlen(forLoop);
     while (1) {
-        char c = /*fgetc(stdin);*/ getKeyPress();
+        char c = getchar();
         
         
         if (c == 127) { //Special case: Backspace

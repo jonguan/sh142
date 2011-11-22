@@ -343,6 +343,10 @@ job* getJob(int value, int type)
     return NULL;
 }
 
+job* getJobList() {
+    return jobList;
+}
+
 
 
 void listJobs()

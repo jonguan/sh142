@@ -8,11 +8,34 @@
 
 #include "scheduler.h"
 
-int checkOnProcess(pid_t pid) {
+void *restrictProcesses(void* param) {
+    while (1) {
+        sleep(3);
+        job *j = getJobList();
+        if (j == NULL) {
+            continue;
+        }
+        restrictProcesses(*j);
+    }
+}
+
+void restrictProcesses(job j) {
+    job *ptr;
+    for (; ptr != NULL; ptr = ptr->next) {
+        checkOnProcess(*ptr);
+    }
+}
+
+/*
+ * Checks if a process uses more resources over time than it should.
+ * Kills process if it does.
+ * CPU% is relative to all processors/cores in system.
+ */
+int checkOnProcess(job j) {
     char *path = (char*)calloc(64, sizeof(char));
     //char *tmp;
     char tmp[8];
-    sprintf(tmp, "%d", pid);
+    sprintf(tmp, "%d", j.pid);
     
     strncat(path, "/proc/", 6);
     strncat(path, tmp, 8);
@@ -20,7 +43,6 @@ int checkOnProcess(pid_t pid) {
     
     FILE *f = fopen(path, "r");
     if (f == NULL) {
-        printf("File '%s' doesn't exist.\nAre you on a Mac?\n", path);
         free(path);
         return EXIT_FAILURE;
     }
@@ -30,14 +52,65 @@ int checkOnProcess(pid_t pid) {
     
     char* ln = (char*)calloc(sz, sizeof(char));
     fgets(ln, sz, f);
-    printf("%d", sz);
-    /*while (*ln != '\0') {
-        fgets(ln, 256, f);
-        printf("%s", ln);
+    
+    char* ptr = strtok(ln, " ");
+    long totJiffies = 0;
+    for (int i = 0; ptr != NULL; i++) {
+        switch (i) {
+            case 13: //utime (CPU usage in user space)
+                totJiffies += atoi(ptr);
+                break;
+            case 14: //stime (CPU usage in kernel space)
+                totJiffies += atoi(ptr);
+                break;
+                
+            default:
+                break;
+        }
+        ptr = strtok(NULL, " ");
+    }
+    fclose(f);
+    
+    f = fopen("/proc/stat", "r");
+    fgets(ln, sz, f); //This is a smaller file, sz is large enough
+    ptr = strtok(ln, " ");
+    long totCpuTime = 0;
+    
+    while (ptr != NULL) { //Calculations made on a CPU core basis
+        totCpuTime += atoi(ptr);
+        ptr = strtok(NULL, " ");
+    }
+    /*while (strncmp(ln, "intr", 4)) { //ALL CPU CORES: does not work atm
+        ptr = strtok(NULL, " ");
+        while (ptr != NULL) {
+            totCpuTime += atoi(ptr);
+            ptr = strtok(NULL, " ");
+        }
+        fgets(ln, sz, f);
     }*/
+    
+    fclose(f);
     
     free(path);
     free(ln);
+    
+    double percentage = (double)totCpuTime / 100;
+    cpuLimitJiffies = percentage * cpuLimit;
+    
+    //Update time
+    time_t t = time(NULL);
+    j.timeOverCpuLimit += difftime(t, j.lastChecked);
+    j.lastChecked = t;
+    
+    if (totJiffies <= cpuLimitJiffies) {
+        j.timeOverCpuLimit = 0;
+        //printf("ALL IS WELL FOR THIS PROCESS\nLIMIT:%ld\tUSED:%ld\n", cpuLimitJiffies, totJiffies);
+    } else if (j.timeOverCpuLimit > cpuTime) { //Limit broken, kill process
+        //printf("DEAD\tTIMELIMIT:%d TIMESPENT:%ld\n", cpuTime, j.timeOverCpuLimit);
+        killJob(j.id);
+    } else {
+        //printf("WARNING: TIME OVER LIMIT:%ld\tLIMIT:%ld\tUSED:%ld\n", j.timeOverCpuLimit, cpuLimitJiffies, totJiffies);
+    }
     
     return EXIT_SUCCESS;
 }
@@ -61,8 +134,8 @@ int setCpuMax(char* cmd) {
         return EXIT_FAILURE;
     }
     
-    CPUPercentage = percentage;
-    CPUSeconds = seconds;
+    cpuLimit = percentage;
+    cpuTime = seconds;
     
     return EXIT_SUCCESS;
 }
