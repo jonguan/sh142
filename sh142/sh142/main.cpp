@@ -304,7 +304,11 @@ int parseInput(char *inputCommand)
             returnValue = returnValue == UNINITIALIZED ? cmdInterpreter(subCommand) : returnValue && cmdInterpreter(subCommand);
             c+=2;
             subCommand = c;
+        }else if (*c == '(' && ! strncmp(c, "((", 2)){
+            //run evaluation on the command
         }
+        
+        
         else if (*c == 'f'){
             //Increment or decrement forloop counter
             if(!strncmp("forend", c, 6)) {
@@ -313,9 +317,12 @@ int parseInput(char *inputCommand)
             }else if(!strncmp("for ", c, 4) || !strncmp("for(", c, 4)){
                 c+=4;
                 numForLoops++;
+            }else{
+                c++;
             }
 
-        }else{
+        }
+        else{
             c++;
         }
         
@@ -443,8 +450,10 @@ int runForLoopParser(char *forLoop)
         else if(*loopPtr == '('){
             // set operands
             numOpenBrace++;
-            char *braceOperans = strcpy(braceOperans, loopPtr);
-            char *token = strtok(braceOperans, ";");
+            char *restOfString = strcpy(restOfString, loopPtr);
+            
+            char *token = strtok(restOfString, ";");
+            
             if (token == NULL) {
                 //print command prompt for more input
             }else if (strstr(token, "=") == NULL){
@@ -456,8 +465,46 @@ int runForLoopParser(char *forLoop)
                 cmdInterpreter(token);
             }
             
+            //Handle evaluation of middle
             char *middle = strtok(NULL, ";");
+            char middleEvalExp[30];
+            sprintf(middleEvalExp, "((%s))", middle);
+            
+            // Handle evaluation of end
             char *end = strtok(NULL, ")");
+            char endEvalExp[20];
+            sprintf(endEvalExp, "((%s))", end);
+            
+            //Evaluate operand when finished with loop
+            
+            if (restOfString != NULL) {
+                // Still evaluation left
+                char *process = strtok(NULL, ";");
+                
+                // Store commands in an array
+                char *processArray[10]; 
+                int i = 0;
+                while (process != NULL && strstr(process, "forend") != NULL) {
+                    processArray[i] = process;
+                    i++;
+                    process = strtok(NULL, ";");
+                }
+                
+                int lengthProcessArray = sizeof(processArray) / sizeof(processArray[0]);
+                
+                // Loop through processArray until end condition met
+                while (!parseInput(middleEvalExp)) {
+                    for (int j = 0; j < lengthProcessArray; j++) {
+                        if (returnValue == UNINITIALIZED || returnValue == EXIT_SUCCESS) {
+                            returnValue = parseInput(processArray[j]);
+                        }else{
+                            return returnValue;
+                        }
+                    }
+                    parseInput(endEvalExp);
+                }
+                
+            }
         }
         
     }
@@ -527,13 +574,15 @@ int cmdInterpreter (char* cmd) {
         
         if(!strncmp("for ", c, 4) || !strncmp("for(", c, 4)){
             //for loop - send 
+            returnValue = runSubCommand(c);
             //returnValue = runForLoopParser(c);
             if (c == NULL) {
                 //finished
                 break;
             }
         }
-        else if (*c == '|'){
+        else 
+            if (*c == '|'){
             //Pipe command
             *c = '\0';
             
@@ -551,7 +600,7 @@ int cmdInterpreter (char* cmd) {
             // get next process to pass results
             c++;
             subcommand = c;
-        } else if (*c == '=' && isalnum(*subcommand)){
+        } else if (*c == '=' && isalpha(*subcommand)){
             //Environment variable
             *c = '\0';
             c++;
