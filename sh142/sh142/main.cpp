@@ -316,9 +316,15 @@ int parseInput(char *inputCommand)
             subCommand = c;
         }else if (*c == '(' && ! strncmp(c, "((", 2)){
             //run evaluation on the command
+            c+=2;
+            char expression[20];
+            char *endOfExp = strtok(expression, "))");
+            size_t lengthExp = strlen(endOfExp);
+            strncpy(expression, c, lengthExp);
+            c+=(lengthExp +2);
+            subCommand = c;
+            returnValue = evaluateEnvVariable(expression);
         }
-        
-        
         else if (*c == 'f'){
             //Increment or decrement forloop counter
             if(!strncmp("forend", c, 6)) {
@@ -802,6 +808,154 @@ int cmdInterpreterExternal (char* cmd) {
 
 
 #pragma mark - Environment Variables
+
+/**
+	evaluateEnvVariable
+ // returns exit status, not what the env variable actually evaluates to
+	@param expression expression to evaluate - without the (( and )); must be in form of i<5 or i++ or i+=1 etc
+	@returns - for conditional statements < <= > >= EXIT_SUCCESS if true, EXIT_FAILURE if false
+ */
+int evaluateEnvVariable(char *expression)
+{
+    char *expPtr = expression;
+    char *variable = expression;
+    
+    
+    while (*expPtr != '\0') {
+        if (*expPtr == '<' || *expPtr == '>' || (*expPtr == '=' && !strncmp(expPtr, "==", 2))) {
+            //set comparison
+            Comparison compare;
+            switch (*expPtr) {
+                case '<':{
+                    if (*(expPtr+1) == '=') {
+                        compare = LESS_THAN_EQUAL;
+                    }else{
+                        compare = LESS_THAN;
+                    }
+                }
+                    break;
+                case '>':{
+                    if (*(expPtr+1) == '=') {
+                        compare = GREATER_THAN_EQUAL;
+                    }else{
+                        compare = GREATER_THAN;
+                    }
+                }
+                    break;
+                case '=':
+                    if (*(expPtr+1) == '=') {
+                        compare = EQUIVALENT;
+                    }
+                default:
+                    break;
+            }
+            
+            //get variable
+            *expPtr = '\0';
+            envVar *var = find_var(variable);
+            size_t leftValue = var->value;
+            
+            expPtr++;
+            variable = expPtr;
+            // get rest of comparison
+            while (!isalnum(*expPtr) && *expPtr != '\0') {
+                expPtr++;
+            }
+            if (*expPtr == '\0') {
+                printf("error with loop expression");
+                return EXIT_FAILURE;
+            }
+            
+            size_t rightValue;
+            if (isalpha(*expPtr)) {
+                envVar *right = find_var(expPtr);
+                rightValue = right->value;
+            }else{
+                rightValue = atoi(expPtr);
+            }
+            
+            // Do the comparison
+            if ( (compare == GREATER_THAN && leftValue > rightValue) ||
+                (compare == GREATER_THAN_EQUAL && leftValue >= rightValue) ||
+                (compare == LESS_THAN && leftValue < rightValue) ||
+                (compare == LESS_THAN_EQUAL && leftValue <= rightValue) ||
+                (compare == EQUIVALENT && leftValue == rightValue) ){
+                printf("comparison is correct\n");
+                return EXIT_SUCCESS;
+            }else{
+                printf("comparison is not true\n");
+                return EXIT_FAILURE;
+            }
+        }else if (*expPtr == '+' || *expPtr == '-') {
+            // evaluation
+            Operation operate;
+            
+            switch (*expPtr) {
+                case '+':{
+                    if (*(expPtr +1) == '+') {
+                        operate = PLUS_ONE;
+                    }
+                    if (*(expPtr+1) == '=') {
+
+                        operate = PLUS_EQUAL;
+                    }
+                }
+                    break;
+                case '-':{
+                    if (*(expPtr +1) == '-') {
+                        operate = MINUS_ONE;
+                    }
+                    if (*(expPtr+1) == '=') {
+                        operate = MINUS_EQUAL;
+                    }
+                }
+                default:
+                    break;
+            }
+            //get variable
+            *expPtr = '\0';
+            envVar *setVar = find_var(variable);
+                        
+            expPtr++;
+            variable = expPtr;
+            // get rest of comparison
+            while (!isdigit(*expPtr) && *expPtr != '\0') {
+                expPtr++;
+            }
+            
+            size_t rightValue;
+            if (operate != PLUS_ONE && operate != MINUS_ONE && *expPtr == '\0') {
+                //error if it's not += or -= without a number
+                printf("error with operation");
+                return EXIT_FAILURE;
+            }else{
+                rightValue = atoi(expPtr);    
+            }
+            
+            // set the variable
+            if (operate == PLUS_ONE) {
+                setVar->value++;
+            }else if(operate == MINUS_ONE){
+                setVar->value--;
+            }else if(operate == MINUS_EQUAL){
+                setVar->value -= rightValue;
+            }else if(operate == PLUS_EQUAL){
+                setVar->value += rightValue;
+            }else{
+                printf("error with syntax\n");
+                return EXIT_FAILURE;
+            }
+            return EXIT_SUCCESS;
+
+        }else{
+            expPtr++;
+        }
+    }
+
+    return EXIT_SUCCESS;
+}
+
+
 int setEnvironmentVariable(char* variable, char*operand){
     if (!strncmp(variable, "PATH", 4)) {
         setExecPath(operand);
