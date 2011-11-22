@@ -17,6 +17,7 @@
 #include "history.h"
 
 /* VARIABLES */
+
 static char* currentPath;
 static char* dataPath;
 static char* execPath;
@@ -43,6 +44,7 @@ int cmdInterpreter (char* cmd);
 int cmdInterpreterInternal (char* cmd);
 int cmdInterpreterExternal (char* cmd);
 
+void tester(void);
 
 void printPrompt(void);
 void init(void);

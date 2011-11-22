@@ -47,7 +47,23 @@ void printPrompt() {
     printf("%s%s ", pathPtr, promptSignature);
 }
 
+
+/*void tester() {
+    char *cmd[3];
+    cmd[0] = (char*) "vim";
+    //cmd[1] = (char*) "&";
+    cmd[1] = NULL;
+    
+    launchJob(cmd, BACKGROUND, (char*)"DEFAULT", 0);
+    listJobs();
+    killJob(1);
+    listJobs();
+}*/
+
 void init() {
+    //shellInit();
+    newShellInit();
+    
     // Initialize variables
     commandIdx = -1;
     command[0] = '\0';
@@ -66,13 +82,7 @@ void init() {
     
     printPrompt();
     
-    /*char *cmd[2];
-    cmd[0] = (char*) "emacs";
-    cmd[1] = (char*) NULL;
-    //cmd[2] = NULL;
-    
-    launchJob(cmd, FOREGROUND, (char*)"DEFAULT", 0);
-    int launchJob(char* cmd[], int mode, char* path, int flag);*/
+    //tester();
 }
 
 #pragma mark - Configuration methods
@@ -191,7 +201,7 @@ int main (int argc, const char * argv[])
     init();
     while (1) {
         //TODO: getKeyPress() doesn't work properly. I think.
-        char c = /*fgetc(stdin);*/ getKeyPress();
+        char c = getchar();//fgetc(stdin); //getKeyPress();
         
         //printf("pressed key: %d\n", c);
         //continue;
@@ -201,7 +211,7 @@ int main (int argc, const char * argv[])
             continue;
         }
         //Yup, -17, -100 and -128/-127 all together makes the arrow up/down-button
-        else if (c == -17 && getKeyPress() == -100) {
+        /*else if (c == -17 && getKeyPress() == -100) {
             c = getKeyPress();
             if (c == -128) { //Arrow Up hit
                 resetCommandBuffer();
@@ -211,7 +221,7 @@ int main (int argc, const char * argv[])
                 loadNextCommandFromHistory(command, &commandIdx);
             }
             continue;
-        } else if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
+        }*/ else if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
             perror((char*)"Command buffer is full.");
             resetCommandBuffer();
             printPrompt();
@@ -677,20 +687,37 @@ int cmdInterpreterInternal (char* cmd) {
     }
     else if (!strncmp(cmd, "exit", 4)) {
         return -1;
-    } 
+    }
+    else if(!strncmp(cmd, "hest", 2)) {
+        printf("\nHAEHAEHAEHAEHAEHAEHAEHAEHHAE\n");
+        char *number = strtok(cmd, "hest ");
+        if (number != NULL) {
+            int n = atoi(number);
+            job *j = getJob(n, JOBID);
+            if (j == NULL) {
+                return 0;
+            }
+            if (j->status == SUSPENDED || j->status == WAITINGINPUT) {
+                setJobInBackground(j, TRUE, false);
+            }
+            else {
+                setJobInBackground(j, FALSE, false);
+            }
+        }
+        return 0;
+    }
     else if (!strncmp(cmd, "jobs", 4)){
         listJobs();
     }
     else if (!strncmp(cmd, "kill", 4)){
         char *number = strtok(cmd, "kill ");
-        int n = atoi(number);
-        killJob(n);
-    }
-    else if(!strncmp(cmd, "fg", 2)) {
-        
-    }
-    else if (!strncmp(cmd, "bg", 2)) {
-        
+        if (number != NULL) {
+            int n = atoi(number);
+            killJob(n);
+            //job *j = getJob(n, JOBID);
+            //deleteJob(j);
+        }
+        return 0;
     }
     else if (!strncmp("$?", cmd, 2)) {
         // exit status history
@@ -766,7 +793,10 @@ int cmdInterpreterExternal (char* cmd) {
     if (tokens[0] != NULL) {
         flag = 1;
     }
-    return launchJob(tokens, mode, (char*)"DEFAULT", flag);
+    
+    launchJob(tokens, (char*)"DEFAULT", flag, mode);
+    return 0;
+    //return launchJob(tokens, mode, (char*)"DEFAULT", flag);
     
 }
 
@@ -863,4 +893,3 @@ int validatePaths(char* pathList) {
     }
     return foundErrors;
 }
-

@@ -7,17 +7,67 @@
 //
 
 #include "jobs.h"
-//#include "main.h"
 
-static int numberOfActiveJobs = 0;
-static job* jobList = NULL;
+void newShellInit()
+{
+    SHELL_PID = getpid();
+    SHELL_TERMINAL = STDIN_FILENO;
+    
+    signal(SIGQUIT, SIG_IGN);
+    signal(SIGTTOU, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
+    signal(SIGTSTP, SIG_IGN);
+    signal(SIGINT, SIG_IGN);
+    //signal(SIGCHLD, &childSignalHandler);
+    signal(SIGCHLD, &signalHandler_child);
+    
+    setpgid(SHELL_PID, SHELL_PID);
+    SHELL_PGID = getpgrp();
+    if (SHELL_PID != SHELL_PGID) {
+        errormsg((char*)"Shell is not the process group leader");
+        exit(EXIT_FAILURE);
+    }
+    if (tcsetpgrp(SHELL_TERMINAL, SHELL_PGID) == -1) {
+        tcgetattr(SHELL_TERMINAL, &SHELL_TMODES);
+    }
+}
 
-static pid_t SHELL_PID;
-static pid_t SHELL_PGID;
-static int SHELL_TERMINAL;
-static int SHELL_IS_INTERACTIVE;
+void shellInit()
+{
+    SHELL_PID = getpid();
+    SHELL_TERMINAL = STDIN_FILENO;
+    SHELL_IS_INTERACTIVE = isatty(SHELL_TERMINAL);
+    
+    if (SHELL_IS_INTERACTIVE) {
+        //while (tcgetpgrp(SHELL_TERMINAL) != (SHELL_PGID = getpgrp())) {
+        //    kill(SHELL_PID, SIGCONT);
+        //}
+        
+        signal(SIGQUIT, SIG_IGN);
+        signal(SIGTTOU, SIG_IGN);
+        signal(SIGTTIN, SIG_IGN);
+        signal(SIGTSTP, SIG_IGN);
+        signal(SIGINT, SIG_IGN);
+        //signal(SIGCHLD, &childSignalHandler);
+        signal(SIGCHLD, &signalHandler_child);
+        
+        setpgid(SHELL_PID, SHELL_PID);
+        SHELL_PGID = getpgrp();
+        if (SHELL_PID != SHELL_PGID) {
+            errormsg((char*)"Shell is not the process group leader");
+            exit(EXIT_FAILURE);
+        }
+        if (tcsetpgrp(SHELL_TERMINAL, SHELL_PGID) == -1) {
+            tcgetattr(SHELL_TERMINAL, &SHELL_TMODES);
+        }
+        
+    }
+    else {
+        errormsg((char*)"Could not make the shell interactive.");
+        exit(EXIT_FAILURE);
+    }
+}
 
-static struct termios SHELL_TMODES;
 
 /**
 	launchJob
@@ -27,7 +77,7 @@ static struct termios SHELL_TMODES;
 	@param flag - STDIN or STDOUT
 	@returns int exit status
  */
-int launchJob(char* cmd[], int mode, char* path, int flag)
+/*int launchJob(char* cmd[], int mode, char* path, int flag)
 
 {
     pid_t pid = fork();
@@ -36,19 +86,21 @@ int launchJob(char* cmd[], int mode, char* path, int flag)
         errormsg((char*)"Failed to fork new process");
         return EXIT_FAILURE;
     } else if (pid == 0) { //Child only
-        signal(SIGQUIT, SIG_DFL);
-        signal(SIGTTOU, SIG_DFL);
-        signal(SIGTTIN, SIG_DFL);
-        signal(SIGTSTP, SIG_DFL);
         signal(SIGINT, SIG_DFL);
-        signal(SIGCHLD, &childSignalHandler);
-        //usleep(20000);
+        signal(SIGQUIT, SIG_DFL);
+        signal(SIGTSTP, SIG_DFL);
+        //signal(SIGTTOU, SIG_IGN);
+        //signal(SIGCHLD, &childSignalHandler);
+        signal(SIGCHLD, &signalHandler_child);
+        signal(SIGTTIN, SIG_DFL);
+        
+        usleep(20000);
         setpgrp();
         
         if (mode == FOREGROUND) {tcsetpgrp(SHELL_TERMINAL, getpid());}
         else if (mode == BACKGROUND) {
-            printf("Job launched as process '%d'\n", getpid());
             numberOfActiveJobs++;
+            printf("Job [%d] launched as process '%d'\n",numberOfActiveJobs, getpid());
         }
         
         //Run the job
@@ -69,27 +121,24 @@ int launchJob(char* cmd[], int mode, char* path, int flag)
             return EXIT_FAILURE;
         }
         
-        exit(EXIT_SUCCESS);
-        //return EXIT_SUCCESS;
+        //exit(EXIT_SUCCESS);
+        return EXIT_SUCCESS;
     } else { //Parent only
         
         setpgid(pid, pid); //Will default to pid
         
         jobList = addJob(pid, pid, *cmd, path, mode);
         job *j = getJob(pid, PROCESSID);
+        //printf("TEST1\n");
         switch (mode) {
-            case FOREGROUND: setJobInBackground(j, 0, false); break;
-            case BACKGROUND: setJobInBackground(j, 0, true); break;
+            case FOREGROUND: printf("\nLAUNCH IN FOREGROUND\n"); setJobInBackground(j, 0, false); break;
+            case BACKGROUND: printf("\nLAUNCH IN BACKGROUND\n"); setJobInBackground(j, 0, true); break;
             default: break;
         }
         wait(NULL);
     }
-    
-    
-    
-    
     return EXIT_SUCCESS;
-}
+}*/
 
 void errormsg(char* c) {
     printf("Error: %s\n", c);
@@ -97,6 +146,7 @@ void errormsg(char* c) {
 
 job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status)
 {
+    usleep(10000);
     job *j = (job*) malloc(sizeof(job));
     j->name = (char*) malloc(sizeof(jobName));
     j->name = strcpy(j->name, jobName);
@@ -124,76 +174,79 @@ job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status)
     }
 }
 
-void jobInit()
-{
-    SHELL_PID = getpid();
-    SHELL_TERMINAL = STDIN_FILENO;
-    SHELL_IS_INTERACTIVE = isatty(SHELL_TERMINAL);
-    
-    if (SHELL_IS_INTERACTIVE) {
-        while (tcgetpgrp(SHELL_TERMINAL) != (SHELL_PGID = getpgrp())) {
-            kill(SHELL_PID, SIGTTIN);
-        }
-        
-        signal(SIGQUIT, SIG_IGN);
-        signal(SIGTTOU, SIG_IGN);
-        signal(SIGTTIN, SIG_IGN);
-        signal(SIGTSTP, SIG_IGN);
-        signal(SIGINT, SIG_IGN);
-        signal(SIGCHLD, &childSignalHandler);
-        
-        setpgid(SHELL_PID, SHELL_PID);
-        SHELL_PGID = getpgrp();
-        if (SHELL_PID != SHELL_PGID) {
-            errormsg((char*)"Shell is not the process group leader");
-            exit(EXIT_FAILURE);
-        }
-        if (tcsetpgrp(SHELL_TERMINAL, SHELL_PGID) == -1) {
-            tcgetattr(SHELL_TERMINAL, &SHELL_TMODES);
-        }
-        
-    }
-    else {
-        errormsg((char*)"Could not make the shell interactive.");
-        exit(EXIT_FAILURE);
-    }
-}
-
 void childSignalHandler(int i)
 {
     int status;
     pid_t pid = waitpid(WAIT_ANY, &status, WUNTRACED | WNOHANG);
     if (pid > 0) {
-        job* job = getJob(pid, PROCESSID);
-        if (job == NULL) {
+        job* j = getJob(pid, PROCESSID);
+        if (j == NULL) {
             return;
         }
         if (WIFEXITED(status)) {
-            if (job->status == BACKGROUND) {
-                printf("\nJob: ‰d Done\t ‰d\n", job->id, job->name);
-                jobList = deleteJob(job);
+            if (j->status == BACKGROUND) {
+                printf("\nJob: %d Done\t %s\n", j->id, j->name);
+                jobList = deleteJob(j);
             }
         }
         else if (WIFSIGNALED(status)) {
-            printf("\nJob: ‰d KILLED\t %s\n", job->id, job->name);
-            jobList = deleteJob(job);
+            printf("\nJob: %d KILLED\t %s\n", j->id, j->name);
+            jobList = deleteJob(j);
         }
         else if (WIFSTOPPED(status)) {
-            if (job->status == BACKGROUND) {
+            if (j->status == BACKGROUND) {
                 tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
                 setJobStatus(pid, WAITINGINPUT);
-                printf("\nJob: ‰d Suspended and wants input\t ‰s\n", numberOfActiveJobs, job->name);
+                printf("\nJob: %d Suspended and wants input\t %s\n", numberOfActiveJobs, j->name);
             }
             else {
-                tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
+                tcsetpgrp(SHELL_TERMINAL, j->pgid);
                 setJobStatus(pid, SUSPENDED);
-                printf("\nJob: %d Stopped\t %s\n", numberOfActiveJobs, job->name);
+                printf("\nJob: %d Stopped\t %s\n", numberOfActiveJobs, j->name);
             }
             return;
         }
         else {
-            if (job->status == BACKGROUND) {
-                jobList = deleteJob(job);
+            if (j->status == BACKGROUND) {
+                jobList = deleteJob(j);
+            }
+        }
+        tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
+    }
+}
+
+void signalHandler_child(int p)
+{
+    pid_t pid;
+    int terminationStatus;
+    pid = waitpid(WAIT_ANY, &terminationStatus, WUNTRACED | WNOHANG);
+    if (pid > 0) {
+        job* j = getJob(pid, PROCESSID);
+        if (j == NULL)
+            return;
+        if (WIFEXITED(terminationStatus)) {
+            if (j->status == BACKGROUND) {
+                printf("\n[%d]+  Done\t   %s\n", j->id, j->name);
+                jobList = deleteJob(j);
+            }
+        } else if (WIFSIGNALED(terminationStatus)) {
+            printf("\n[%d]+  KILLED\t   %s\n", j->id, j->name);
+            jobList = deleteJob(j);
+        } else if (WIFSTOPPED(terminationStatus)) {
+            if (j->status == BACKGROUND) {
+                tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
+                setJobStatus(pid, WAITINGINPUT);
+                printf("\n[%d]+   suspended [wants input]\t   %s\n",
+                       numberOfActiveJobs, j->name);
+            } else {
+                tcsetpgrp(SHELL_TERMINAL, j->pgid);
+                setJobStatus(pid, SUSPENDED);
+                printf("\n[%d]+   stopped\t   %s\n", numberOfActiveJobs, j->name);
+            }
+            return;
+        } else {
+            if (j->status == BACKGROUND) {
+                jobList = deleteJob(j);
             }
         }
         tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
@@ -202,19 +255,20 @@ void childSignalHandler(int i)
 
 int setJobStatus(int pid, int newStatus)
 {
-    job *job = jobList;
-    if (job == NULL) {
+    usleep(10000);
+    job *j = jobList;
+    if (j == NULL) {
         return 0;
     }
     else {
-        int counter = 0;
-        while (job != NULL) {
-            if (job->pid == pid) {
-                job->status = newStatus;
+        int i = 0;
+        while (j != NULL) {
+            if (j->pid == pid) {
+                j->status = newStatus;
                 return 1;
             }
-            counter++;
-            job = job->next;
+            i++;
+            j = j->next;
         }
         return FALSE;
     }
@@ -222,6 +276,8 @@ int setJobStatus(int pid, int newStatus)
 
 job* deleteJob(job *j)
 {
+    
+    usleep(10000);
     if (jobList == NULL) {
         return NULL;
     }
@@ -249,6 +305,7 @@ job* deleteJob(job *j)
 
 job* getJob(int value, int type)
 {
+    usleep(10000);
     job *job = jobList;
     if (type == PROCESSID) {
         while (job != NULL) {
@@ -351,6 +408,150 @@ void waitJob(job* j)
 void killJob(int id)
 {
     job *j = getJob(id, JOBID);
+    if (j == NULL || id > numberOfActiveJobs) {
+        return;
+    }
     kill(j->pid, SIGKILL);
 }
 
+/////////////////////
+
+/*
+
+void executeCommand(char *command[], char *file, int newDescriptor,
+                    int executionMode)
+{
+    int commandDescriptor;
+    if (newDescriptor == STDIN) {
+        commandDescriptor = open(file, O_RDONLY, 0600);
+        dup2(commandDescriptor, STDIN_FILENO);
+        close(commandDescriptor);
+    }
+    if (newDescriptor == STDOUT) {
+        commandDescriptor = open(file, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+        dup2(commandDescriptor, STDOUT_FILENO);
+        close(commandDescriptor);
+    }
+    if (execvp(*command, command) == -1)
+        perror("MSH");
+}
+
+void launchJob(char *command[], char *file, int newDescriptor,
+               int executionMode)
+{
+    pid_t pid;
+    pid = fork();
+    switch (pid) {
+        case -1:
+            perror("MSH");
+            exit(EXIT_FAILURE);
+            break;
+        case 0:
+            signal(SIGINT, SIG_DFL);
+            signal(SIGQUIT, SIG_DFL);
+            signal(SIGTSTP, SIG_DFL);
+            signal(SIGCHLD, &childSignalHandler);
+            signal(SIGTTIN, SIG_DFL);
+            usleep(20000);
+            setpgrp();
+            if (executionMode == FOREGROUND)
+                tcsetpgrp(SHELL_TERMINAL, getpid());
+            if (executionMode == BACKGROUND)
+                printf("[%d] %d\n", ++numberOfActiveJobs, (int) getpid());
+            
+            //executeCommand(command, file, newDescriptor, executionMode);
+            
+            int commandDescriptor;
+            if (newDescriptor == STDIN) {
+                commandDescriptor = open(file, O_RDONLY, 0600);
+                dup2(commandDescriptor, STDIN_FILENO);
+                close(commandDescriptor);
+            }
+            if (newDescriptor == STDOUT) {
+                commandDescriptor = open(file, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+                dup2(commandDescriptor, STDOUT_FILENO);
+                close(commandDescriptor);
+            }
+            if (execvp(*command, command) == -1)
+                perror("MSH");
+            
+            ////
+            exit(EXIT_SUCCESS);
+            break;
+        default:
+            setpgid(pid, pid);
+            
+            jobList = addJob(pid, pid, *(command), file, (int) executionMode);
+            
+            job* j = getJob(pid, PROCESSID);
+            
+            if (executionMode == FOREGROUND) {
+                setJobInBackground(j, FALSE, false);
+                //putJobForeground(j, FALSE);
+            }
+            if (executionMode == BACKGROUND)
+                setJobInBackground(j, FALSE, true);
+                //putJobBackground(j, FALSE);
+            break;
+    }
+}*/
+
+int launchJob(char* cmd[], char* path, int flag, int mode) {
+    pid_t pid = fork();
+    if (pid == -1) {
+        return -1;
+    }
+    else if (pid == 0) { // INSIDE CHILD
+        signal(SIGINT, SIG_DFL);
+        signal(SIGQUIT, SIG_DFL);
+        signal(SIGTSTP, SIG_DFL);
+        signal(SIGCHLD, &childSignalHandler);
+        signal(SIGTTIN, SIG_DFL);
+        usleep(20000);
+        setpgrp();
+        if (mode == FOREGROUND) {
+            tcsetpgrp(SHELL_TERMINAL, getpid());
+        }
+        if (mode == BACKGROUND) {
+            printf("Job: %d %d\n", ++numberOfActiveJobs, (int) getpid());
+        }
+        
+        int cd;
+        if (flag == STDIN) {
+            cd = open(path, O_RDONLY, 0600);
+            dup2(cd, STDIN_FILENO);
+            close(cd);
+        }
+        if (flag == STDOUT) {
+            cd = open(path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+            dup2(cd, STDOUT_FILENO);
+            close(cd);
+        }
+        
+        if (execvp(*cmd, cmd) == -1) {
+            return EXIT_FAILURE;
+        }
+        //exit(EXIT_SUCCESS);
+        return EXIT_SUCCESS;
+    }
+    else {
+        setpgid(pid, pid);
+        jobList = addJob(pid, pid, *cmd, path, mode);
+        
+        job *j = getJob(pid, PROCESSID);
+        
+        switch (mode) {
+            case FOREGROUND: printf("\nLAUNCH IN FOREGROUND\n"); setJobInBackground(j, 0, false); break;
+            case BACKGROUND: printf("\nLAUNCH IN BACKGROUND\n"); setJobInBackground(j, 0, true); break;
+            default: break;
+        }
+        
+        /*if (mode == FOREGROUND) {
+            setJobInBackground(j, FALSE, false);
+        }
+        if (mode == BACKGROUND) {
+            setJobInBackground(j, FALSE, true);
+        }*/
+    }
+    return EXIT_SUCCESS;
+}
