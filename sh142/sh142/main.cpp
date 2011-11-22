@@ -799,7 +799,14 @@ int cmdInterpreterExternal (char* cmd) {
         flag = 1;
     }
     
-    launchJob(tokens, (char*)"DEFAULT", flag, mode);
+    //
+    if (mode == BACKGROUND) {
+        launchBackgroundJob(tokens, (char*)"DEFAULT", flag);
+    }
+    
+    //launchJob(tokens, (char*)"DEFAULT", flag, mode);
+    
+    
     return 0;
     //return launchJob(tokens, mode, (char*)"DEFAULT", flag);
     

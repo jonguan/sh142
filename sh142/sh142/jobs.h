@@ -57,5 +57,8 @@ void waitForJob(job* j);
 job* getJobList(void);
 void killJob(int id);
 void listJobs(void);
+void putToBackground(job* j);
+
+int launchBackgroundJob(char* cmd[], char* path, int flag);
 
 #endif
