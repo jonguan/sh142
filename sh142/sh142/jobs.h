@@ -16,8 +16,10 @@
 #define SUSPENDED 'S'
 #define WAITINGINPUT 'W'
 
-#define STDIN 1
-#define STDOUT 2
+#define STDIN 0
+#define STDOUT 1
+#define STDERR 2
+#define STDINOUT 3
 
 #define PROCESSID 1
 #define JOBID 2
@@ -49,6 +51,7 @@ int launchJob(char* cmd[], char* path, int flag, int mode);
 job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status);
 void childSignalHandler(int i);
 void setJobInBackground(job* j, int cont, bool bg);
+//void setJobInBackground(job* j, int cont, bool bg, char* path, int rw);
 void errormsg(char* c);
 int setJobStatus(int pid, int newStatus);
 job* deleteJob(job *job);

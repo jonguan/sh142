@@ -834,32 +834,31 @@ int cmdInterpreterExternal (char* cmd) {
         mode = FOREGROUND; 
     }
         
-    char *token = strtok(cmd, " ");
+    char *token = strtok(cmd, " &");
     char *tokens[20];
     int i = 0;
     while (token != NULL) {
         tokens[i] = token;
         i++;
-        token = strtok(NULL, " ");
+        token = strtok(NULL, " &");
         //tokens+=1;
     }
     tokens[i] = '\0';
 
     
-    int flag = 0;
-    if (tokens[0] != NULL) {
-        flag = 1;
-    }
+    int flag = -1;
+    /*if (tokens[0] != NULL) {
+        flag = STDIN;
+    }*/
     
     //
-    if (mode == BACKGROUND) {
-        launchBackgroundJob(tokens, (char*)"DEFAULT", flag);
-    }
-    
-    //launchJob(tokens, (char*)"DEFAULT", flag, mode);
     
     
-    return 0;
+    return launchJob(tokens, (char*)"DEFAULT", flag, mode);
+    
+    
+    
+    //return 0;
     //return launchJob(tokens, mode, (char*)"DEFAULT", flag);
     
 }
