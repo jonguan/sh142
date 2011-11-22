@@ -108,7 +108,8 @@ void init() {
 
 void readConfigFile()
 {
-    configFile = fopen(".sh142", "r");
+    configFile = fopen(".sh142", "a+");
+    fseek(configFile, 0L, SEEK_SET); //Rewinds to start of file
     if (configFile != NULL) {
         //printf("CONFIG FILE FOUND\n");
 		char str1[128];
