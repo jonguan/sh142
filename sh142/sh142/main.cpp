@@ -93,6 +93,7 @@ void init() {
      j.pid = 600;
      j.lastChecked = time(NULL);
      j.timeOverCpuLimit = 0;
+    jobList = &j;
      while (1) {
      sleep(2);
      checkOnProcess(j);
