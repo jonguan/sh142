@@ -48,21 +48,20 @@ void printPrompt() {
 }
 
 
-/*void tester() {
+void tester() {
     char *cmd[3];
-    cmd[0] = (char*) "vim";
+    cmd[0] = (char*) "emacs";
     //cmd[1] = (char*) "&";
     cmd[1] = NULL;
     
-    launchJob(cmd, BACKGROUND, (char*)"DEFAULT", 0);
-    listJobs();
-    killJob(1);
-    listJobs();
-}*/
+    launchJob(cmd, (char*)"DEFAULT", 1, BACKGROUND);
+    //listJobs();
+    //killJob(1);
+    //listJobs();
+}
 
 void init() {
-    //shellInit();
-    newShellInit();
+    shellInit();
     
     // Initialize variables
     commandIdx = -1;
@@ -83,6 +82,23 @@ void init() {
     printPrompt();
     
     //tester();
+    
+    //TORKIL'S TEST AREA
+    
+    //Thread will not work on mac!
+   // pthread_create(&schedThread, NULL, restrictProcesses, NULL);
+    
+    /*job j;
+     j.pid = 600;
+     j.lastChecked = time(NULL);
+     j.timeOverCpuLimit = 0;
+    jobList = &j;
+     while (1) {
+     sleep(2);
+     checkOnProcess(j);
+     }*/
+    
+    //END TORKIL'S TEST AREA
 }
 
 #pragma mark - Configuration methods
@@ -247,21 +263,6 @@ int main (int argc, const char * argv[])
     return EXIT_SUCCESS;
 }
 
-//TODO: This is basically ripped of teh internetz, needs rewriting.
-char getKeyPress() {
-    struct termios t, newT;
-    char c;
-    
-    tcgetattr(STDIN_FILENO, &t);
-    newT = t;
-    newT.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newT);
-    c = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &t);
-    
-    return c;
-}
-
 void resetCommandBuffer() {
     for (char* c = command; *c != '\0'; c++) *c = '\0';
     
@@ -318,7 +319,7 @@ int parseInput(char *inputCommand)
             //run evaluation on the command
             c+=2;
             char *endOfExp = strstr(c, "))");
-            int lengthExp = endOfExp - c;
+            size_t lengthExp = endOfExp - c;
             char expression[20];
             strncpy(expression, c, lengthExp);
             expression[lengthExp]='\0';
@@ -583,7 +584,7 @@ int getRestOfForLoop(char* loopString){
     printf(">");
     
     while (1) {
-        
+ 
         char c = getchar();
         if (c == 127) { //Special case: Backspace
             *loopPtr = '\0';
@@ -746,9 +747,8 @@ int cmdInterpreterInternal (char* cmd) {
     else if (!strncmp(cmd, "exit", 4)) {
         return -1;
     }
-    else if(!strncmp(cmd, "hest", 2)) {
-        printf("\nHAEHAEHAEHAEHAEHAEHAEHAEHHAE\n");
-        char *number = strtok(cmd, "hest ");
+    else if(!strncmp(cmd, "fg", 2)) {
+        char *number = strtok(cmd, "fg ");
         if (number != NULL) {
             int n = atoi(number);
             job *j = getJob(n, JOBID);
@@ -772,8 +772,7 @@ int cmdInterpreterInternal (char* cmd) {
         if (number != NULL) {
             int n = atoi(number);
             killJob(n);
-            //job *j = getJob(n, JOBID);
-            //deleteJob(j);
+
         }
         return 0;
     }

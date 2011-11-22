@@ -10,10 +10,16 @@
 #define sh142_scheduler_h
 
 #include "definitions.h"
+#include "jobs.h"
+#include <time.h>
 
-static int CPUPercentage, CPUSeconds;
+static pthread_t schedThread;
+static int cpuLimit = 100, cpuTime = 100;
+static long cpuLimitJiffies = 0;
 
-int checkOnProcess(pid_t pid);
+void *restrictProcesses(void* param);
+void restrictProcesses(job j);
+int checkOnProcess(job j);
 
 int setCpuMax(char* cmd);
 

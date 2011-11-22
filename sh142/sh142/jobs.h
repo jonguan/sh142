@@ -21,22 +21,22 @@
 
 #define PROCESSID 1
 #define JOBID 2
-#define JOBSTATUS 3
-
 
 
 typedef struct job {
     int id;             // Job ID
-    char *name;         // 
+    char *name;         // Job name
     pid_t pid;          // Process ID
     pid_t pgid;         // Process group ID
+    long lastChecked;        //Time since last check by scheduler
+    time_t timeOverCpuLimit;//Time process spent preceding CPU usage limit
     int status;         // Status value
-    char *descriptor;   // Descriptor (hehe)
+    char *descriptor;   // Descriptor
     struct job *next;   // Next active job
 } job;
 
 static int numberOfActiveJobs = 0;
-static job* jobList = NULL;
+//static job* jobList = NULL;
 
 static pid_t SHELL_PID;
 static pid_t SHELL_PGID;
@@ -44,26 +44,18 @@ static int SHELL_TERMINAL;
 static int SHELL_IS_INTERACTIVE;
 static struct termios SHELL_TMODES;
 
-void newShellInit(void);
-
-//int launchJob(char* cmd[], int mode, char* path, int flag);
-
+void shellInit(void);
 int launchJob(char* cmd[], char* path, int flag, int mode);
-
-void errormsg(char* c);
-    
-void childSignalHandler(int i);
-void shellInit();
-void listJobs();
-
 job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status);
+void childSignalHandler(int i);
+void setJobInBackground(job* j, int cont, bool bg);
+void errormsg(char* c);
 int setJobStatus(int pid, int newStatus);
 job* deleteJob(job *job);
 job* getJob(int value, int type);
-
-void setJobInBackground(job* j, int cont, bool bg);
-void waitJob(job* j);
+void waitForJob(job* j);
+job* getJobList(void);
 void killJob(int id);
+void listJobs(void);
 
-void signalHandler_child(int p);
 #endif

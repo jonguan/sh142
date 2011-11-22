@@ -15,6 +15,7 @@
 #include "pipe.h"
 #include "jobs.h"
 #include "history.h"
+#include "scheduler.h"
 
 /* VARIABLES */
 
