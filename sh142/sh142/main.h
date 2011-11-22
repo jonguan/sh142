@@ -69,6 +69,8 @@ int generateConfig(void);
 int putLnToFile(FILE* dest, char* key, char* val);
 void resetCommandBuffer(void);
 
+// For Loop
+int getRestOfForLoop(char* loopString);
 
 // Environment Varaibles
 int evaluateEnvVariable(char *expression);

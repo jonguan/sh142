@@ -86,7 +86,7 @@ void init() {
     //TORKIL'S TEST AREA
     
     //Thread will not work on mac!
-    pthread_create(&schedThread, NULL, restrictProcesses, NULL);
+   // pthread_create(&schedThread, NULL, restrictProcesses, NULL);
     
     /*job j;
      j.pid = 600;
@@ -281,7 +281,7 @@ void resetCommandBuffer() {
 #pragma mark - Parser
 int parseInput(char *inputCommand)
 {
-    int numForLoops = 0;
+    int numOpenForLoops = 0;
     int returnValue = UNINITIALIZED;
     char *subCommand = inputCommand; //pointer to beginning of subCommand
     char* c = inputCommand;    // iterator through cmd
@@ -292,7 +292,7 @@ int parseInput(char *inputCommand)
     while (*c != '\0') {
         // Top level checks for logical operators && and || and for loops
      
-         if (*c == '&' && !strncmp(c, "&&", 2) && numForLoops == 0) {
+         if (*c == '&' && !strncmp(c, "&&", 2) && numOpenForLoops == 0) {
             *c = '\0';
             if (returnValue == EXIT_FAILURE) {
                 // Fast returning
@@ -304,7 +304,7 @@ int parseInput(char *inputCommand)
             c+=2;
             subCommand = c;
         }
-        else if(*c == '|' && !strncmp(c, "||", 2) && numForLoops == 0){
+        else if(*c == '|' && !strncmp(c, "||", 2) && numOpenForLoops == 0){
             *c = '\0';
             if (returnValue == EXIT_SUCCESS) {
                 // Fast return
@@ -318,10 +318,11 @@ int parseInput(char *inputCommand)
         }else if (*c == '(' && ! strncmp(c, "((", 2)){
             //run evaluation on the command
             c+=2;
+            char *endOfExp = strstr(c, "))");
+            size_t lengthExp = endOfExp - c;
             char expression[20];
-            char *endOfExp = strtok(expression, "))");
-            size_t lengthExp = strlen(endOfExp);
             strncpy(expression, c, lengthExp);
+            expression[lengthExp]='\0';
             c+=(lengthExp +2);
             subCommand = c;
             returnValue = evaluateEnvVariable(expression);
@@ -330,10 +331,10 @@ int parseInput(char *inputCommand)
             //Increment or decrement forloop counter
             if(!strncmp("forend", c, 6)) {
                 c+=6;
-                numForLoops--;
+                numOpenForLoops--;
             }else if(!strncmp("for ", c, 4) || !strncmp("for(", c, 4)){
                 c+=4;
-                numForLoops++;
+                numOpenForLoops++;
             }else{
                 c++;
             }
@@ -445,11 +446,36 @@ int parsePipeCommand(char *command)
 // Gets entire beginning of for loop
 // if complete syntax is not given, then will print > for more input
 // returns exit status; upon return, forLoop will be set to the command input after forend, or NULL if finished
+// for(i=0;i<5;i++); echo hello; forend
 int runForLoopParser(char *forLoop)
 {
+    //parse out original "for"
+    forLoop+=3;
+    
+    
     int returnValue = UNINITIALIZED;
-    int numOpenBrace = 0;
+    //int numOpenBrace = 1;
     char *loopPtr = forLoop;
+    
+    
+    //check for loop completion
+    char* endLoop = strstr(forLoop, "forend");
+    if (endLoop == NULL) {
+        char *forLoopBuffer = (char*)malloc(SIZE_PIPE_BUFFER);
+        strcpy(forLoopBuffer, forLoop);
+        
+        if (getRestOfForLoop(forLoopBuffer)) {
+            printf("for loop syntax error");
+            return EXIT_FAILURE;
+        }else{
+            loopPtr = forLoopBuffer;
+        }
+        
+    }
+    
+ 
+    
+ 
     
     //assume for loop is given in entirety
     while (*loopPtr != '\0') {
@@ -458,105 +484,134 @@ int runForLoopParser(char *forLoop)
             loopPtr+=6;
             forLoop = loopPtr;
             return EXIT_SUCCESS;
-        }  
+        }  /*
         // nested for loop
         else if(!strncmp(loopPtr, "for ", 4) || !strncmp(loopPtr, "for(", 4)){
             returnValue = runForLoopParser(loopPtr);
             
-        }
+        }*/
         else if(*loopPtr == '('){
             // set operands
-            numOpenBrace++;
-            char *restOfString = strcpy(restOfString, loopPtr);
+            loopPtr++;
+            char *restOfString = (char*)malloc(SIZE_PIPE_BUFFER);
+            strcpy(restOfString, loopPtr);
             
             char *token = strtok(restOfString, ";");
+            char *middle = strtok(NULL, ";");
+            char *end = strtok(NULL, ")");
             
-            if (token == NULL) {
+            
+            char *process = strtok(NULL, ";");
+            
+            // Store commands in an array
+            char *processArray[10];
+            int lengthProcessArray = 0;
+            while (process != NULL && strstr(process, "forend") == NULL) {
+                processArray[lengthProcessArray] = process;
+                lengthProcessArray++;
+                process = strtok(NULL, ";");
+            }
+
+            
+            if (token == NULL || middle == NULL || end == NULL || process == NULL) {
                 //print command prompt for more input
-            }else if (strstr(token, "=") == NULL){
+                printf("error in for loop syntax");
+                return EXIT_FAILURE;
+            }
+            
+            
+            
+            if (strstr(token, "=") == NULL){
                 // ERROR - first command needs to have =
                 *forLoop = '\0';
                 return EXIT_FAILURE;
             }else{
                 // give to cmd to evaluate
-                cmdInterpreter(token);
+                size_t lengthToken = strlen(token);
+                char copy[lengthToken];
+                strcpy(copy, token);
+                cmdInterpreter(copy);
             }
             
             //Handle evaluation of middle
-            char *middle = strtok(NULL, ";");
             char middleEvalExp[30];
             sprintf(middleEvalExp, "((%s))", middle);
             
             // Handle evaluation of end
-            char *end = strtok(NULL, ")");
             char endEvalExp[20];
             sprintf(endEvalExp, "((%s))", end);
             
             //Evaluate operand when finished with loop
+            /*
+            printf("%s and %s",restOfString, loopPtr);
+            char *endParn = strstr(loopPtr, ")");
+            size_t lenOperands = endParn - loopPtr;
+            loopPtr+=(lenOperands+1);
+           */
+            loopPtr = '\0';
             
-            if (restOfString != NULL) {
-                // Still evaluation left
-                char *process = strtok(NULL, ";");
-                
-                // Store commands in an array
-                char *processArray[10]; 
-                int i = 0;
-                while (process != NULL && strstr(process, "forend") != NULL) {
-                    processArray[i] = process;
-                    i++;
-                    process = strtok(NULL, ";");
-                }
-                
-                int lengthProcessArray = sizeof(processArray) / sizeof(processArray[0]);
-                
-                // Loop through processArray until end condition met
-                while (!parseInput(middleEvalExp)) {
-                    for (int j = 0; j < lengthProcessArray; j++) {
-                        if (returnValue == UNINITIALIZED || returnValue == EXIT_SUCCESS) {
-                            returnValue = parseInput(processArray[j]);
-                        }else{
-                            return returnValue;
-                        }
+            // Loop through processArray until end condition met
+            while (parseInput(middleEvalExp) == EXIT_SUCCESS) {
+                for (int j = 0; j < lengthProcessArray; j++) {
+                    if (returnValue == UNINITIALIZED || returnValue == EXIT_SUCCESS) {
+                        // copy before sending it in
+                        char*copy = (char *)malloc(50);
+                        char*procPtr = processArray[j];
+                        strcpy(copy, procPtr);
+                        returnValue = parseInput(copy);
+                        free(copy);
+                    }else{
+                        break;
                     }
-                    parseInput(endEvalExp);
                 }
-                
+                parseInput(endEvalExp);
             }
+            free(restOfString);
+            forLoop=NULL;
+            return returnValue;
         }
         
     }
+    return EXIT_FAILURE;
+
+}
+
+#pragma mark - For Loop
+int getRestOfForLoop(char* loopString){
+    char *loopPtr = loopString + strlen(loopString);
+    *loopPtr = ';';
+    loopPtr++;
+    printf(">");
     
-    //size_t forLength = strlen(forLoop);
     while (1) {
+ 
         char c = getchar();
-        
-        
         if (c == 127) { //Special case: Backspace
-            command[commandIdx--] = '\0';
+            *loopPtr = '\0';
+            loopPtr--;
             continue;
-        }
-        else if (++commandIdx >= CMD_LEN) { //Special case: buffer is full
+        }else if (strlen(loopString) >= SIZE_PIPE_BUFFER) { //Special case: buffer is full
             perror((char*)"Command buffer is full.");
-            resetCommandBuffer();
-            printPrompt();
-            continue;
+            return EXIT_FAILURE;
         }
         
-        command[commandIdx] = c; //Assigns a char from keyboard input to command string
+        *loopPtr = c; //Assigns a char from keyboard input to command string
         
         //User hit return - replace \n with \0
-        if (command[commandIdx] == '\n') { //The whole command is stored in command array
-            command[commandIdx] = '\0';
-            
-            //Parser goes here 
-            if (EXIT == parseInput(command)) {
+        if (*loopPtr == '\n') { 
+            //check for forend
+            if (strstr(loopString, "forend") != NULL) {
+                *loopPtr = '\0';
                 return EXIT_SUCCESS;
+            }else{
+                printf(">");
             }
-            
-            resetCommandBuffer();
-            printPrompt();
+
         }
+        loopPtr++;
+      
     }
+
     return EXIT_SUCCESS;
 }
 
@@ -591,15 +646,12 @@ int cmdInterpreter (char* cmd) {
         
         if(!strncmp("for ", c, 4) || !strncmp("for(", c, 4)){
             //for loop - send 
-            returnValue = runSubCommand(c);
-            //returnValue = runForLoopParser(c);
-            if (c == NULL) {
-                //finished
-                break;
-            }
+            //returnValue = runSubCommand(c);
+            returnValue = runForLoopParser(c);
+            rememberExitStatus(returnValue);
+            return returnValue;
         }
-        else 
-            if (*c == '|'){
+        else if (*c == '|'){
             //Pipe command
             *c = '\0';
             
