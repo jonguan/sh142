@@ -61,14 +61,16 @@ int launchPipeJob(char* cmd[], char* pathIn, char* pathOut, int mode)
         dup2(descriptorIn, STDIN_FILENO);
         close(descriptorIn);
         
+        
         descriptorOut = open(pathOut, O_CREAT | O_TRUNC | O_WRONLY, 0600);
         dup2(descriptorOut, STDOUT_FILENO);
         close(descriptorOut);
         
-        
         if (execvp(*cmd, cmd) == -1) {
             return EXIT_FAILURE;
         }
+        
+        
         return EXIT_SUCCESS;
     }
     else {
@@ -141,7 +143,11 @@ int launchJob(char* cmd[], char* path, int flag, int mode)
         setpgid(pid, pid);
         jobList = addJob(pid, pid, *cmd, path, path, mode);
         job *j = getJob(pid, PROCESSID);
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> db4c6492e4747d1a89be89a3b61983a13aeadabc
         switch (mode) {
             case FOREGROUND: setJobInBackground(j, 0, false); break;
             case BACKGROUND: setJobInBackground(j, 0, true); break;
@@ -164,8 +170,12 @@ void setJobInBackground(job* j, int cont, bool bg)
     if (bg) {
         kill(j->pid, SIGTSTP);
         usleep(10000);
+<<<<<<< HEAD
+           }
+=======
         //printf("\n\nTEST\n\n");
     }
+>>>>>>> db4c6492e4747d1a89be89a3b61983a13aeadabc
     else {
         waitForJob(j);
     }
@@ -216,6 +226,10 @@ job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptorIn, char*descri
 
 void childSignalHandler(int i)
 {
+<<<<<<< HEAD
+
+=======
+>>>>>>> db4c6492e4747d1a89be89a3b61983a13aeadabc
     int status;
     pid_t pid = waitpid(WAIT_ANY, &status, WUNTRACED | WNOHANG);
     if (pid > 0) {
