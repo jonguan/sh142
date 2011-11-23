@@ -47,7 +47,6 @@ static pid_t SHELL_PID;
 static pid_t SHELL_PGID;
 static int SHELL_TERMINAL;
 static int SHELL_IS_INTERACTIVE;
-static struct termios SHELL_TMODES;
 
 void shellInit(void);
 int launchPipeJob(char* cmd[], char* pathIn, char* pathOut, int mode);

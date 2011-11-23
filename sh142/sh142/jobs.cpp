@@ -28,88 +28,6 @@ void shellInit()
         errormsg((char*)"Shell is not the process group leader");
         exit(EXIT_FAILURE);
     }
-    if (tcsetpgrp(SHELL_TERMINAL, SHELL_PGID) == -1) {
-        tcgetattr(SHELL_TERMINAL, &SHELL_TMODES);
-    }
-    
-    
-}
-
-int launchBackgroundJob(char* cmd[], char* path, int flag)
-{
-    pid_t pid = fork();
-    if (pid == -1) {
-        perror("ERROR");
-        return -1;
-    }
-    else if (pid == 0) {
-        /*
-        signal(SIGINT, SIG_DFL);
-        signal(SIGQUIT, SIG_DFL);
-        signal(SIGTSTP, SIG_DFL);
-        signal(SIGTTIN, SIG_DFL);
-        signal(SIGTTOU, SIG_IGN);//
-        signal(SIGCHLD, &childSignalHandler);
-        
-        numberOfActiveJobs++;
-        printf("Job: %d\tPID: %d\n", numberOfActiveJobs, (int) getpid());
-        tcsetpgrp(SHELL_TERMINAL, getpid());
-        
-        int descriptor;
-        if (flag == STDIN) {
-            descriptor = open(path, O_RDONLY, 0600);
-            dup2(descriptor, STDIN_FILENO);
-            close(descriptor);
-        }
-        if (flag == STDOUT) {
-            descriptor = open(path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
-            dup2(descriptor, STDOUT_FILENO);
-            close(descriptor);
-        }
-        */
-        
-        if (execvp(*cmd, cmd) == -1) {
-            return EXIT_FAILURE;
-        }
-        tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
-        return EXIT_SUCCESS;
-        
-        
-    }
-    else {
-        
-        /*
-        setpgid(pid, pid);
-        jobList = addJob(pid, pid, *cmd, path, BACKGROUND);
-        
-        job *j = getJob(pid, PROCESSID);
-
-        if (j->status != WAITINGINPUT) {
-            j->status = WAITINGINPUT;
-        }
-        if (kill(-j->pgid, SIGCONT) < 0) {
-            perror("error");
-        }
-        usleep(10000);
-        //int status;
-        //waitpid(j->pid, &status, WNOHANG);
-        
-        //signal(SIGCHLD, NULL);
-        
-        //waitpid(j->pid, NULL, 0);
-        
-        //waitpid(SHELL_PID, &status, WNOHANG);
-        
-        signal(SIGCHLD, childSignalHandler);
-         
-        */
-        
-        tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
-        
-        
-    }
-    tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
-    return EXIT_SUCCESS;
 }
 
 int launchPipeJob(char* cmd[], char* pathIn, char* pathOut, int mode)
@@ -188,7 +106,7 @@ int launchJob(char* cmd[], char* path, int flag, int mode)
         signal(SIGQUIT, SIG_DFL);
         signal(SIGTSTP, SIG_DFL);
         signal(SIGTTIN, SIG_DFL);
-        signal(SIGTTOU, SIG_IGN);//
+        signal(SIGTTOU, SIG_IGN);
         signal(SIGCHLD, &childSignalHandler);
         usleep(20000);
         setpgrp();
@@ -197,7 +115,7 @@ int launchJob(char* cmd[], char* path, int flag, int mode)
         }
         if (mode == BACKGROUND) {
             numberOfActiveJobs++;
-            printf("Job: %d\tPID: %d\n", numberOfActiveJobs, (int) getpid());
+            //printf("Job: %d\tPID: %d\n", numberOfActiveJobs, (int) getpid());
         }
         
         // Run the job
@@ -223,10 +141,13 @@ int launchJob(char* cmd[], char* path, int flag, int mode)
         setpgid(pid, pid);
         jobList = addJob(pid, pid, *cmd, path, path, mode);
         job *j = getJob(pid, PROCESSID);
+<<<<<<< HEAD
         //printf("\n%c\n", mode);
+=======
+>>>>>>> bf6ae757350fcb9921b8a90a10e3475dceb26a75
         switch (mode) {
-            case FOREGROUND: printf("%s Launched in foreground\n", j->name); setJobInBackground(j, 0, false); break;
-            case BACKGROUND: printf("%s Launched in background\n", j->name); setJobInBackground(j, 0, true); break;
+            case FOREGROUND: setJobInBackground(j, 0, false); break;
+            case BACKGROUND: setJobInBackground(j, 0, true); break;
             default: break;
         }
     }
@@ -243,45 +164,18 @@ void setJobInBackground(job* j, int cont, bool bg)
             perror("error");
         }
     }
-    //tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
     if (bg) {
-        usleep(10000);
-        
         kill(j->pid, SIGTSTP);
+<<<<<<< HEAD
         usleep(10000);
         //printf("\n\nTEST\n\n");
+=======
+>>>>>>> bf6ae757350fcb9921b8a90a10e3475dceb26a75
     }
     else {
         waitForJob(j);
     }
     tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
-    
-    /*if (bg) {
-        if (j == NULL) {
-            return;
-        }
-        if (cont && j->status != WAITINGINPUT) {
-            j->status = WAITINGINPUT;
-        }
-        if (cont) {
-            if (kill(-j->pgid, SIGCONT) < 0) {
-                perror("error");
-            }
-        }
-        usleep(10000);
-        tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
-    }
-    else {
-        j->status = FOREGROUND;
-        tcsetpgrp(SHELL_TERMINAL, j->pgid);
-        if (cont) {
-            if (kill(-j->pgid, SIGCONT) < 0) {
-                perror("error");
-            }
-        }
-        waitForJob(j);
-        tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
-    }*/
 }
 
 
@@ -328,7 +222,10 @@ job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptorIn, char*descri
 
 void childSignalHandler(int i)
 {
+<<<<<<< HEAD
     //printf("\n\nTEST 2\n\n");
+=======
+>>>>>>> bf6ae757350fcb9921b8a90a10e3475dceb26a75
     int status;
     pid_t pid = waitpid(WAIT_ANY, &status, WUNTRACED | WNOHANG);
     if (pid > 0) {
@@ -350,12 +247,12 @@ void childSignalHandler(int i)
             if (j->status == BACKGROUND) {
                 tcsetpgrp(SHELL_TERMINAL, SHELL_PGID);
                 setJobStatus(pid, WAITINGINPUT);
-                printf("\nJob %d (%s) Suspended and waiting input\n", j->id/* numberOfActiveJobs*/, j->name);
+                printf("\nJob %d (%s) Suspended and waiting input\n", j->id, j->name);
             }
             else {
                 tcsetpgrp(SHELL_TERMINAL, j->pgid);
                 setJobStatus(pid, SUSPENDED);
-                printf("\nJob %d (%s) Stopped\n", j->id/* numberOfActiveJobs*/, j->name);
+                printf("\nJob %d (%s) Stopped\n", j->id, j->name);
             }
             return;
         }
@@ -479,7 +376,7 @@ void waitForJob(job* j)
 void killJob(int id)
 {
     job *j = getJob(id, JOBID);
-    if (j == NULL || id > numberOfActiveJobs) {
+    if (j == NULL) {
         return;
     }
     kill(j->pid, SIGKILL);

@@ -58,7 +58,7 @@ int cmdInterpreter (char* cmd);
 int cmdInterpreterInternal (char* cmd);
 int cmdInterpreterExternal (char* cmd);
 
-void tester(void);
+void cd(char* dir);
 
 void printPrompt(void);
 void init(void);

@@ -51,6 +51,11 @@ int checkOnProcess(job j) {
     strcpy(path, ppath);
     strncat(path, "/stat", 5);
     
+    if (fileExists(path)) {
+        free(ppath);
+        free(path);
+        return 1;
+    }
     FILE *f = fopen(path, "r");
     if (f == NULL) {
         free(ppath);
@@ -119,6 +124,13 @@ int checkOnProcess(job j) {
     long totMemory = 0; //Memory spent by process
     strcpy(path, ppath);
     strcat(path, "/statm");
+    
+    if (fileExists(path)) {
+        free(ppath);
+        free(path);
+        free(ln);
+        return 1;
+    }
     f = fopen(path, "r");
     if (f == NULL) {
         free(ppath);
@@ -153,6 +165,9 @@ int checkOnProcess(job j) {
 }
 
 long initScheduler() {
+    if (fileExists((char*)"/proc/stat")) {
+        return 1;
+    }
     FILE *f = fopen("/proc/stat", "r");
     if (f == NULL) {
         return EXIT_FAILURE;
@@ -173,14 +188,19 @@ long initScheduler() {
     }
     fclose(f);
     
+    if (fileExists((char*)"/proc/meminfo")) {
+        free(ln);
+        return 1;
+    }
     f = fopen("/proc/meminfo", "r");
     if (f == NULL) {
         free(ln);
         return EXIT_FAILURE;
     }
-    fseek(f, 0L, SEEK_END);
+    /*fseek(f, 0L, SEEK_END);
     sz = (int)ftell(f);
-    fseek(f, 0L, SEEK_SET);
+    fseek(f, 0L, SEEK_SET);*/
+    sz = 256;
     
     ln = (char*)calloc(sz, sizeof(char));
     ptr = ln;
@@ -265,4 +285,12 @@ int setCpuMax(char* cmd) {
     cpuTime = seconds;
     
     return EXIT_SUCCESS;
+}
+
+int fileExists(char* path) {
+    struct stat s;
+    if (stat(path, &s) == 0) {
+        return 0;
+    }
+    return 1;
 }
