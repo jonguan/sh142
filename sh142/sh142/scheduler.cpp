@@ -150,11 +150,15 @@ int checkOnProcess(job j) {
     fclose(f);
     
     if (totMemory > memLimitJiffies) {
-        killJob(j.id);
-        free(ppath);
-        free(path);
-        free(ln);
-        return EXIT_SUCCESS;
+        if (j.timeOverMemLimit > memTime) {
+            killJob(j.id);
+            free(ppath);
+            free(path);
+            free(ln);
+            return EXIT_SUCCESS;
+        }
+    } else {
+        j.timeOverMemLimit = 0;
     }
     
     free(ppath);
