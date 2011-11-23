@@ -48,18 +48,6 @@ void printPrompt() {
 }
 
 
-void tester() {
-    char *cmd[3];
-    cmd[0] = (char*) "emacs";
-    //cmd[1] = (char*) "&";
-    cmd[1] = NULL;
-    
-    launchJob(cmd, (char*)"DEFAULT", 1, BACKGROUND);
-    //listJobs();
-    //killJob(1);
-    //listJobs();
-}
-
 void init() {
     shellInit();
     
@@ -80,8 +68,6 @@ void init() {
     saveCommandToHistory((char*)"-- no more commands --");
     
     printPrompt();
-    
-    //tester();
     
     //TORKIL'S TEST AREA
     
@@ -771,10 +757,10 @@ int cmdInterpreterInternal (char* cmd) {
         }
         return 0;
     }
-    else if (!strncmp(cmd, "jobs", 4)){
+    else if (!strncmp(cmd, "jobs", 4)) {
         listJobs();
     }
-    else if (!strncmp(cmd, "kill", 4)){
+    else if (!strncmp(cmd, "kill", 4)) {
         char *number = strtok(cmd, "kill ");
         if (number != NULL) {
             int n = atoi(number);
@@ -782,6 +768,10 @@ int cmdInterpreterInternal (char* cmd) {
 
         }
         return 0;
+    }
+    else if (!strncmp(cmd, "cd", 2)) {
+        char *c = strtok(cmd, "cd ");
+        cd(c);
     }
     else if (!strncmp("$?", cmd, 2)) {
         // exit status history
@@ -1121,4 +1111,16 @@ int validatePaths(char* pathList) {
         foundErrors++;
     }
     return foundErrors;
+}
+
+void cd(char* dir)
+{
+    if (dir == NULL) {
+        return;
+    }
+    else {
+        if(chdir(dir) == -1) {
+            printf(" %s: no such directory\n", dir);
+        }
+    }
 }
