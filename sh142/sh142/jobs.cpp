@@ -61,14 +61,16 @@ int launchPipeJob(char* cmd[], char* pathIn, char* pathOut, int mode)
         dup2(descriptorIn, STDIN_FILENO);
         close(descriptorIn);
         
+        
         descriptorOut = open(pathOut, O_CREAT | O_TRUNC | O_WRONLY, 0600);
         dup2(descriptorOut, STDOUT_FILENO);
         close(descriptorOut);
         
-        
         if (execvp(*cmd, cmd) == -1) {
             return EXIT_FAILURE;
         }
+        
+        
         return EXIT_SUCCESS;
     }
     else {
@@ -141,10 +143,7 @@ int launchJob(char* cmd[], char* path, int flag, int mode)
         setpgid(pid, pid);
         jobList = addJob(pid, pid, *cmd, path, path, mode);
         job *j = getJob(pid, PROCESSID);
-<<<<<<< HEAD
-        //printf("\n%c\n", mode);
-=======
->>>>>>> bf6ae757350fcb9921b8a90a10e3475dceb26a75
+
         switch (mode) {
             case FOREGROUND: setJobInBackground(j, 0, false); break;
             case BACKGROUND: setJobInBackground(j, 0, true); break;
@@ -166,12 +165,8 @@ void setJobInBackground(job* j, int cont, bool bg)
     }
     if (bg) {
         kill(j->pid, SIGTSTP);
-<<<<<<< HEAD
         usleep(10000);
-        //printf("\n\nTEST\n\n");
-=======
->>>>>>> bf6ae757350fcb9921b8a90a10e3475dceb26a75
-    }
+           }
     else {
         waitForJob(j);
     }
@@ -222,10 +217,7 @@ job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptorIn, char*descri
 
 void childSignalHandler(int i)
 {
-<<<<<<< HEAD
-    //printf("\n\nTEST 2\n\n");
-=======
->>>>>>> bf6ae757350fcb9921b8a90a10e3475dceb26a75
+
     int status;
     pid_t pid = waitpid(WAIT_ANY, &status, WUNTRACED | WNOHANG);
     if (pid > 0) {
