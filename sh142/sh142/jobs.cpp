@@ -106,6 +106,7 @@ void setJobInBackground(job* j, int cont, bool bg)
     }
     if (bg) {
         kill(j->pid, SIGTSTP);
+        usleep(10000);
     }
     else {
         waitForJob(j);

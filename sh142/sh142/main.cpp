@@ -667,6 +667,7 @@ int cmdInterpreter (char* cmd) {
             char restOfString[40];
             strcpy(restOfString, c);
             char *operand = strtok(restOfString, " ;");
+            
             returnValue = setEnvironmentVariable(subcommand, operand);
             
             c+= strlen(operand);
@@ -791,20 +792,6 @@ int cmdInterpreterInternal (char* cmd) {
         }else{
             // have $%notANumber
             return EXIT_FAILURE;
-        }
-    }
-    else if (!strncmp(cmd, "CPUMAX=", 7)) {
-        if (setCpuMax(cmd)) {
-            printf("Failed to set max CPU\n");
-        }
-    }
-    else if (!strncmp(cmd, "MEMMAX=", 7)) {
-        if (setMemMax(cmd)) {
-        }
-    }
-    else if (!strncmp(cmd, "TIMEMAX=", 8)) {
-        if (setTimeMax(cmd)) {
-            printf("\nFailed to set max time\n\n");
         }
     }
     
@@ -1028,7 +1015,37 @@ int evaluateEnvVariable(char *expression)
 
 
 int setEnvironmentVariable(char* variable, char*operand){
-    if (!strncmp(variable, "PATH", 4)) {
+    if (!strncmp(variable, "CPUMAX", 6)) {
+        //char *c = (char*)calloc(128, sizeof(char));
+        char c[64];
+        strcpy(c, variable);
+        strcat(c, "=");
+        strcat(c, operand);
+        //sprintf(c, operand);
+        printf("cmd: %s\n", c);
+        if (setCpuMax(c)) {
+            printf("Failed to set max CPU\n");
+        }
+    }
+    else if (!strncmp(variable, "MEMMAX", 6)) {
+        char c[64];
+        strcpy(c, variable);
+        strcat(c, "=");
+        strcat(c, operand);
+        if (setMemMax(c)) {
+            printf("Failed to set max memory\n");
+        }
+    }
+    else if (!strncmp(variable, "TIMEMAX", 7)) {
+        char c[64];
+        strcpy(c, variable);
+        strcat(c, "=");
+        strcat(c, operand);
+        if (setTimeMax(c)) {
+            printf("\nFailed to set max time\n\n");
+        }
+    }
+    else if (!strncmp(variable, "PATH", 4)) {
         setExecPath(operand);
     } 
     else if (!strncmp(variable, "DATA", 4)) {
