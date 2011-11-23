@@ -13,12 +13,17 @@
 #ifndef sh142_pipe_h
 #define sh142_pipe_h
 
+int runPipeParser(char* pipe);
 int runExternalCommand(char*);
 int runSubCommand(char*subCommand);
 int runPipeCommand(char* inCommand, char* outCommand);
-int runPipeReadCommand(char *command, char*result); // read from stdin, writes to result
-int runPipeWriteCommand(char *command, char* inputString, char* result);//Reads from inputFile, passes to command, writes into result
+int pipeCommand(char* cmd1[], char* cmd2[]);
+int runPipeReadCommand(char *command, char*file); // read from stdin, writes to result
+int runPipeWriteCommand(char *command, char* fileIn, char* fileOut);//Reads from inputFile, passes to command, writes into result
 
 // Redirect STDIN and STDOUT
-int redirectToFile (char *fileName);
+int redirectToFile (char *command);
+
+// Utility
+int copyFromFile(char*destination, char*source);
 #endif
