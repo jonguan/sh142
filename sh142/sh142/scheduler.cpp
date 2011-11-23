@@ -197,9 +197,10 @@ long initScheduler() {
         free(ln);
         return EXIT_FAILURE;
     }
-    fseek(f, 0L, SEEK_END);
+    /*fseek(f, 0L, SEEK_END);
     sz = (int)ftell(f);
-    fseek(f, 0L, SEEK_SET);
+    fseek(f, 0L, SEEK_SET);*/
+    sz = 256;
     
     ln = (char*)calloc(sz, sizeof(char));
     ptr = ln;
