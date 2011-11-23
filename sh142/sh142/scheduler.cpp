@@ -98,6 +98,8 @@ int checkOnProcess(job j) {
     j.timeOverCpuLimit += delta;
     j.lastChecked = t;
     
+    //printf("usedJiffies:%ld\tlimit:%ld\n", totJiffies, cpuLimitJiffies);
+    
     if (totJiffies <= cpuLimitJiffies) {
         j.timeOverCpuLimit = 0;
         //printf("ALL IS WELL FOR THIS PROCESS\nLIMIT:%ld\tUSED:%ld\n", cpuLimitJiffies, totJiffies);

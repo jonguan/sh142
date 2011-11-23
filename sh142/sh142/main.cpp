@@ -1006,7 +1006,7 @@ int setEnvironmentVariable(char* variable, char*operand){
         strcat(c, "=");
         strcat(c, operand);
         //sprintf(c, operand);
-        printf("cmd: %s\n", c);
+        //printf("cmd: %s\n", c);
         if (setCpuMax(c)) {
             printf("Failed to set max CPU\n");
         }
