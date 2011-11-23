@@ -627,10 +627,8 @@ int cmdInterpreter (char* cmd) {
     char *subcommand = cmd;
     char* c = cmd;    // iterator through cmd
     
-    //Set up storage buffer
-    char *data = (char *) malloc (SIZE_PIPE_BUFFER + 1); //buffer for pipe
    
-    
+        
     while (*c != '\0') {
         
         
@@ -643,22 +641,8 @@ int cmdInterpreter (char* cmd) {
         }
         else if (*c == '|'){
             //Pipe command
-            *c = '\0';
+            returnValue = runPipeParser(subcommand);
             
-            if (returnValue == UNINITIALIZED) {
-                // run command, put in data
-                returnValue = runPipeReadCommand(subcommand, data);
-            }else{
-                // send data in and store into buffer
-                char *nextData = (char *) malloc (SIZE_PIPE_BUFFER + 1);
-                returnValue = runPipeWriteCommand(subcommand, data, nextData);
-                free(data);
-                data = nextData;
-            }
-            
-            // get next process to pass results
-            c++;
-            subcommand = c;
         } else if (*c == '=' && isalpha(*subcommand)){
             //Environment variable
             *c = '\0';
@@ -692,7 +676,7 @@ int cmdInterpreter (char* cmd) {
             return EXIT_SUCCESS;
         } else if (*c == '>' || *c == '<' || !strncmp(c, "2>", 2)){
             // stdin and stdout and stderr redirection
-            
+            returnValue = redirectToFile(subcommand);
         }
         else{
             c++;
@@ -718,7 +702,7 @@ int cmdInterpreter (char* cmd) {
     }
         
         
-    free(data);
+    //free(data);
     return EXIT_SUCCESS;
 }
 
@@ -823,7 +807,7 @@ int cmdInterpreterExternal (char* cmd) {
      printf("%s\n", startPtr);
      return 1;
      */
-    
+    int returnValue = UNINITIALIZED;
     int mode = UNINITIALIZED;
     char* ampersand = strstr(cmd, "&");
     if (ampersand - cmd > 0) {
@@ -857,8 +841,8 @@ int cmdInterpreterExternal (char* cmd) {
      @param path - path to a file
      @param flag - STDIN or STDOUT
      */
-    launchJob(tokens, (char*)"DEFAULT", flag, mode);
-    return EXIT_SUCCESS;
+    returnValue = launchJob(tokens, (char*)"DEFAULT", flag, mode);
+    return returnValue;
 
     //return launchJob(tokens, mode, (char*)"DEFAULT", flag);
     

@@ -35,7 +35,8 @@ typedef struct job {
     time_t timeOverMemLimit;//Time process spent preceding memory usage limit
     time_t timeAlive;       //Time the job has been alive in total
     int status;         // Status value
-    char *descriptor;   // Descriptor
+    char *descriptorIn;   // DescriptorIn
+    char *descriptorOut; // DescriptorOut
     struct job *next;   // Next active job
 } job;
 
@@ -48,8 +49,9 @@ static int SHELL_TERMINAL;
 static int SHELL_IS_INTERACTIVE;
 
 void shellInit(void);
+int launchPipeJob(char* cmd[], char* pathIn, char* pathOut, int mode);
 int launchJob(char* cmd[], char* path, int flag, int mode);
-job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status);
+job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptorIn, char* descriptorOut, int status);
 void childSignalHandler(int i);
 void setJobInBackground(job* j, int cont, bool bg);
 //void setJobInBackground(job* j, int cont, bool bg, char* path, int rw);
@@ -64,5 +66,6 @@ void listJobs(void);
 void putToBackground(job* j);
 
 int launchBackgroundJob(char* cmd[], char* path, int flag);
+
 
 #endif

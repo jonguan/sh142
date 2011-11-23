@@ -30,6 +30,62 @@ void shellInit()
     }
 }
 
+int launchPipeJob(char* cmd[], char* pathIn, char* pathOut, int mode)
+{
+    pid_t pid = fork();
+    if (pid == -1) {
+        errormsg((char*)"Failed to fork new process");
+        return -1;
+    }
+    else if (pid == 0) { // INSIDE CHILD
+        signal(SIGINT, SIG_DFL);
+        signal(SIGQUIT, SIG_DFL);
+        signal(SIGTSTP, SIG_DFL);
+        signal(SIGTTIN, SIG_DFL);
+        signal(SIGTTOU, SIG_IGN);//
+        signal(SIGCHLD, &childSignalHandler);
+        usleep(20000);
+        setpgrp();
+        if (mode == FOREGROUND) {
+            tcsetpgrp(SHELL_TERMINAL, getpid());
+        }
+        if (mode == BACKGROUND) {
+            numberOfActiveJobs++;
+            printf("Job: %d\tPID: %d\n", numberOfActiveJobs, (int) getpid());
+        }
+        
+        // Run the job
+        int descriptorIn, descriptorOut;
+      
+        descriptorIn = open(pathIn, O_RDONLY, 0600);
+        dup2(descriptorIn, STDIN_FILENO);
+        close(descriptorIn);
+        
+        descriptorOut = open(pathOut, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+        dup2(descriptorOut, STDOUT_FILENO);
+        close(descriptorOut);
+        
+        
+        if (execvp(*cmd, cmd) == -1) {
+            return EXIT_FAILURE;
+        }
+        return EXIT_SUCCESS;
+    }
+    else {
+        setpgid(pid, pid);
+        jobList = addJob(pid, pid, *cmd, pathIn, pathOut, mode);
+        job *j = getJob(pid, PROCESSID);
+        //printf("\n%c\n", mode);
+        switch (mode) {
+            case FOREGROUND: printf("%s Launched in foreground\n", j->name); setJobInBackground(j, 0, false); break;
+            case BACKGROUND: printf("%s Launched in background\n", j->name); setJobInBackground(j, 0, true); break;
+            default: break;
+        }
+    }
+    tcsetpgrp(SHELL_TERMINAL, getpid());
+    return EXIT_SUCCESS;
+}
+
 /**
  launchJob
  @param cmd - array of strings from command where cmd[0] = command name and all else are descriptors
@@ -83,8 +139,9 @@ int launchJob(char* cmd[], char* path, int flag, int mode)
     }
     else {
         setpgid(pid, pid);
-        jobList = addJob(pid, pid, *cmd, path, mode);
+        jobList = addJob(pid, pid, *cmd, path, path, mode);
         job *j = getJob(pid, PROCESSID);
+        
         switch (mode) {
             case FOREGROUND: setJobInBackground(j, 0, false); break;
             case BACKGROUND: setJobInBackground(j, 0, true); break;
@@ -107,6 +164,7 @@ void setJobInBackground(job* j, int cont, bool bg)
     if (bg) {
         kill(j->pid, SIGTSTP);
         usleep(10000);
+        //printf("\n\nTEST\n\n");
     }
     else {
         waitForJob(j);
@@ -119,7 +177,7 @@ void errormsg(char* c) {
     printf("Error: %s\n", c);
 }
 
-job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status)
+job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptorIn, char*descriptorOut, int status)
 {
     usleep(10000);
     job *j = (job*) malloc(sizeof(job));
@@ -132,9 +190,12 @@ job* addJob(pid_t pid, pid_t pgid, char* jobName,char* descriptor, int status)
     j->timeAlive = 0;
     j->timeOverMemLimit = 0;
     j->status = status;
-    j->descriptor = (char*) malloc(sizeof(descriptor));
-    j->descriptor = strcpy(j->descriptor, descriptor);
+    j->descriptorIn = (char*) malloc(sizeof(descriptorIn));
+    j->descriptorIn = strcpy(j->descriptorIn, descriptorIn);
+    j->descriptorOut = (char*) malloc(sizeof(descriptorOut));
+    j->descriptorOut = strcpy(j->descriptorOut, descriptorOut);
     j->next = NULL;
+    
     
     if (jobList == NULL) {
         numberOfActiveJobs++;
@@ -282,7 +343,9 @@ void listJobs()
             printf("\t- Name: %s\n", j->name);
             printf("\t- PID: %d\n", j->pid);
             printf("\t- Status: %c\n", j->status);
-            printf("\t- Descriptor: %s\n\n", j->descriptor);
+            printf("\t- Descriptor In: %s\n", j->descriptorIn);
+            printf("\t- Descriptor Out: %s\n\n", j->descriptorOut);
+            
             j = j->next;
         }
     }

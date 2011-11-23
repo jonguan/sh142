@@ -9,17 +9,167 @@
 #include <iostream>
 #include <stdio.h>
 #include "pipe.h"
+#include "jobs.h"
 
+int runPipeParser(char *pipeCommands){
+    int returnValue = UNINITIALIZED;
+/*
+    char *allCommands[25];
+    int numcommands = 0;
+    char *command = strtok(pipeCommands, "|");
+    while (command != NULL) {
+        //insert into array
+        allCommands[numcommands] = command;
+        command = strtok(NULL, "|");
+        numcommands++;
+    }
+    allCommands[numcommands] = '\0';
+  */
+    
+    char *c = pipeCommands;
+    char *subcommand = pipeCommands;
+    //Set up storage buffer
+    char *data = (char *) malloc (SIZE_PIPE_BUFFER + 1); //buffer for pipe
+    //char *data = "file";
+    
+    while (*c != '\0') {
+        if (*c == '|') {
+            *c = '\0';
+            
+            if (returnValue == UNINITIALIZED) {
+                // run command, put in data
+                returnValue = runPipeReadCommand(subcommand, data);
+             
+            }else{
+                // send data in and store into buffer
+                char *nextData = (char *) malloc (SIZE_PIPE_BUFFER + 1);
+                //char *nextData = "fileOut";
+                returnValue = runPipeWriteCommand(subcommand, data, nextData);
+                //copyFromFile(data, nextData);
+                free(data);
+                data = nextData;
+            }
+            
+            c++;
+            subcommand = c;
+        }else{
+            c++;
+        }
+        
+        
+    }
+
+    if (returnValue == UNINITIALIZED) {
+        // run command, put in data
+        returnValue = runPipeReadCommand(subcommand, data);
+      
+    }else{
+        // send data in and store into buffer
+        char *nextData = (char *) malloc (SIZE_PIPE_BUFFER + 1);
+        //char *nextData = "fileOut";
+        returnValue = runPipeWriteCommand(subcommand, data, nextData);
+        
+        free(data);
+        data = nextData;
+    }
+    free(data);
+    return returnValue;
+}
+
+int copyFromFile(char*destination, char*source){
+    FILE *in, *out;
+    char ch;
+    
+    if((in=fopen(source, "r")) == NULL) {
+        printf("Cannot open input file.\n");
+        exit(1);
+    }
+    if((out=fopen(destination, "w")) == NULL) {
+        printf("Cannot open output file.\n");
+        exit(1);
+    }
+    
+    while(!feof(in)) {
+        ch = getc(in);
+        if(ferror(in)) {
+            printf("Read Error");
+            clearerr(in);
+            break;
+        } else {
+            if(!feof(in)) putc(ch, out);
+            if(ferror(out)) {
+                printf("Write Error");
+                clearerr(out);
+                break;
+            }
+        }
+    }
+    fclose(in);
+    fclose(out);
+    return EXIT_SUCCESS;
+}
 
 //Command is full command input of from the buffer
 int runExternalCommand(char *command)
 {
     char *cmd = strtok(command, " ");
-    
     return runSubCommand(cmd);
     
 }
 
+/************************
+ function: void pipeCommand(char** cmd1, char** cmd2)
+ comment: This pipes the output of cmd1 into cmd2.
+ **************************/
+int pipeCommand(char *cmd1[], char*cmd2[]) {
+    const int PIPE_READ = 0;
+    const int PIPE_WRITE = 1;
+    int fds[2]; // file descriptors
+    pipe(fds); // create the pipe
+    
+    // Execute the second command.
+    // child process #2
+    if (fork() == 0) {
+        // Reassign stdout to fds[1] end of pipe.
+        dup2(fds[PIPE_WRITE], STDOUT_FILENO);
+        close(fds[PIPE_READ]);
+        close(fds[PIPE_WRITE]);
+        // Execute the first command.
+        execlp(*cmd1, *cmd1, NULL);
+        
+        /*
+         if (execvp(*cmd1, cmd1) == -1){
+         return EXIT_FAILURE;
+         }*/
+        //return EXIT_SUCCESS;
+    }
+    
+    // child process #1
+    if (fork() == 0) {
+        // Reassign stdin to fds[0] end of pipe.
+        dup2(fds[PIPE_READ], STDIN_FILENO);
+        close(fds[PIPE_WRITE]);
+        close(fds[PIPE_READ]);
+             //   wait(NULL);
+        execlp(*cmd2, *cmd2, NULL);
+        //
+      
+        /*
+        if (execvp(*cmd2, cmd2) == -1){
+            return EXIT_FAILURE;
+        }*/
+        //return EXIT_SUCCESS;
+    }
+    
+
+    close(fds[PIPE_WRITE]);
+    close(fds[PIPE_READ]);
+    wait(NULL);
+    wait(NULL);
+    return EXIT_SUCCESS;
+}
+
+/*
 int runPipeCommand(char* inCommand, char *outCommand)
 {
     FILE *in_pipe;
@@ -30,12 +180,12 @@ int runPipeCommand(char* inCommand, char *outCommand)
     size_t nbytes = SIZE_PIPE_BUFFER;
     char *my_string;
     
-    /* Open our two pipes */
+    //Open our two pipes 
     in_pipe = popen (inCommand, "r");
     out_pipe = popen (outCommand, "w");
    // out_read_pipe = popen(, "r");
     
-    /* Check that pipes are non-null, therefore open */
+    // Check that pipes are non-null, therefore open 
     if ((!in_pipe) || (!out_pipe))
     {
         fprintf (stderr,
@@ -43,11 +193,11 @@ int runPipeCommand(char* inCommand, char *outCommand)
         return EXIT_FAILURE;
     }
     
-    /* Read from ps_pipe until two newlines */
+    //Read from ps_pipe until two newlines 
     my_string = (char *) malloc (nbytes + 1);
     bytes_read = getdelim (&my_string, &nbytes, '\0', in_pipe);
     
-    /* Close ps_pipe, checking for errors */
+    // Close ps_pipe, checking for errors 
     if (pclose (in_pipe) != 0)
     {
         fprintf (stderr,
@@ -55,22 +205,22 @@ int runPipeCommand(char* inCommand, char *outCommand)
     }
 
     
-    /* Send output of 'ps -A' to 'grep init', with two newlines */
+    // Send output of 'ps -A' to 'grep init', with two newlines 
     fprintf (out_pipe, "%s\n\n", my_string);
     //printf("%s\n\n", my_string);
     
-    /* Close grep_pipe, cehcking for errors */
+    // Close grep_pipe, cehcking for errors 
     if (pclose (out_pipe) != 0)
     {
         fprintf (stderr,
                  "Could not run %s, or other error.\n", outCommand);
     }
     
-    /* Exit! */
+    //Exit! 
     free(my_string);
     return 0;
 
-}
+}*/
 
 /*
 int runPipeCommand(char** inCommand, char** outCommand)
@@ -119,9 +269,51 @@ int runPipeCommand(char** inCommand, char** outCommand)
     return 0;
     
 }*/
+/*
+int runPipeReadCommand(char *command, char*file)
+{
+    int redirectType = STDOUT;
+    int mode = FOREGROUND;
+    
+    //tokennize the command
+    char *token = strtok(command, " ");
+    char *tokens[10];
+    int i = 0;
+    while (token != NULL) {
+        tokens[i] = token;
+        i++;
+        token = strtok(NULL, " &");
+    }
+    tokens[i] = '\0';
+
+    
+    return launchJob(tokens, file , redirectType, mode);
+
+}
+
+int runPipeWriteCommand(char *command, char* fileIn, char* fileOut){
+    int redirectType = STDIN;
+    int mode = FOREGROUND;
+    
+    //tokennize the command
+    char *token = strtok(command, " ");
+    char *tokens[10];
+    int i = 0;
+    while (token != NULL) {
+        tokens[i] = token;
+        i++;
+        token = strtok(NULL, " &");
+    }
+    tokens[i] = '\0';
+    
+    
+
+     launchJob(tokens, fileIn , redirectType, mode);
+    //launchPipeJob(tokens, fileIn, fileOut, mode);
+}*/
 
 
-int runPipeReadCommand(char *command, char*result)
+int runPipeReadCommand(char *command, char*file)
 {
     FILE *read_pipe;
    
@@ -129,10 +321,10 @@ int runPipeReadCommand(char *command, char*result)
     size_t nbytes = SIZE_PIPE_BUFFER;
     //char *my_string;
     
-    /* Open our two pipes */
+    // Open our two pipes 
     read_pipe = popen (command, "r");
        
-    /* Check that pipes are non-null, therefore open */
+    //Check that pipes are non-null, therefore open 
     if (!read_pipe)
     {
         fprintf (stderr,
@@ -140,24 +332,24 @@ int runPipeReadCommand(char *command, char*result)
         return EXIT_FAILURE;
     }
     
-    /* Read from ps_pipe until two newlines */
+    // Read from ps_pipe until two newlines 
     //my_string = (char *) malloc (nbytes + 1);
-    bytes_read = getdelim (&result, &nbytes, '\0', read_pipe);
+    bytes_read = getdelim (&file, &nbytes, '\0', read_pipe);
     
-    /* Close ps_pipe, checking for errors */
-    if (pclose (read_pipe) != 0)
+    // Close ps_pipe, checking for errors 
+    if (pclose (read_pipe) == -1)
     {
-        fprintf (stderr, "Could not run %s.\n", command);
+      //  fprintf (stderr, "Could not run %s.\n", command);
         return EXIT_FAILURE;
     }
             
-    /* Send output of 'ps -A' to 'grep init', with two newlines */
+    //Send output of 'ps -A' to 'grep init', with two newlines 
    // printf("%s\n", result);
     return 0;
 }
 
 
-int runPipeWriteCommand(char *command, char* inputString, char* result)
+int runPipeWriteCommand(char *command, char* fileIn, char* fileOut)
 {
     
     FILE *out_pipe;
@@ -165,12 +357,12 @@ int runPipeWriteCommand(char *command, char* inputString, char* result)
     long bytes_read;
     size_t nbytes = SIZE_PIPE_BUFFER;
 
-    /* Open our two pipes */
+    
    // ps_pipe = popen (command, "r");
     out_pipe = popen (command, "w");
     // header_pipe = popen ("grep UID", "w");
     
-    /* Check that pipes are non-null, therefore open */
+    // Check that pipes are non-null, therefore open 
     if (!out_pipe)
     {
         fprintf (stderr,
@@ -178,27 +370,27 @@ int runPipeWriteCommand(char *command, char* inputString, char* result)
         return EXIT_FAILURE;
     }
     
-    /* Send output of 'ps -A' to 'grep init', with two newlines */
+    // Send output of 'ps -A' to 'grep init', with two newlines 
    // printf("%s", inputString);
-    fprintf (out_pipe, "%s", inputString);
+    fprintf (out_pipe, "%s", fileIn);
     
 
     // Try to read out_pipe into a string
     
     
 
-    /* Close grep_pipe, cehcking for errors */
+    // Close grep_pipe, cehcking for errors 
     
     if (pclose (out_pipe) !=0){
-        fprintf (stderr, "could not run %s, or other error\n", command);
+       // fprintf (stderr, "could not run %s, or other error\n", command);
         return EXIT_FAILURE;
     }
     
     
-    bytes_read = getdelim (&result, &nbytes, '\0', out_pipe);  
+    bytes_read = getdelim (&fileOut, &nbytes, '\0', out_pipe);  
     //printf("%s", result );
     
-    /* Exit! */
+    // Exit! 
     
     return 0;
 
@@ -231,7 +423,7 @@ int runSubCommand(char *subCommand){
     bytes_read = getdelim (&my_string, &nbytes, '\0', ps_pipe);
     
     /* Close ps_pipe, checking for errors */
-    if (pclose (ps_pipe) != 0)
+    if (pclose (ps_pipe) == -1)
     {
         fprintf (stderr,
                  "Could not run %s.\n", subCommand);
@@ -259,6 +451,69 @@ int runSubCommand(char *subCommand){
     
 }
 
-int redirectToFile (char *fileName){
-    return EXIT_SUCCESS;
+int redirectToFile (char *command){
+    int returnValue = UNINITIALIZED;
+    char *cmdPtr = command;
+    char *processName = command;
+    char filename[30];
+    
+    while (*cmdPtr != '\0') {
+        if (*cmdPtr == '>' || *cmdPtr == '<' || (*cmdPtr == '2' && !strncmp(cmdPtr, "2>", 2))) {
+            int redirectType = -1;
+            switch (*cmdPtr) {
+                case '<':
+                    redirectType = STDIN;
+                    break;
+                case '>':
+                    redirectType = STDOUT;
+                    break;
+                case '2':{
+                    cmdPtr++; //for the 2>
+                    redirectType = STDERR;
+                }
+                    break;
+                default:
+                    break;
+            }
+            
+            *cmdPtr = '\0';
+            cmdPtr++;
+            //remove whitespace
+            while (*cmdPtr == ' ') {
+                cmdPtr++;
+            }
+            strcpy(filename, cmdPtr);
+            //filename = cmdPtr;
+            //stdout to file
+            //freopen(filename, "w", stdout);
+            //cmdInterpreter(processName);
+            int mode = FOREGROUND;
+            char *token = strtok(processName, " ");
+            char *tokens[20];
+            int i = 0;
+            while (token != NULL) {
+                tokens[i] = token;
+                i++;
+                token = strtok(NULL, " &");
+            }
+            tokens[i] = '\0';
+            
+            
+            
+            /*
+             launchJob
+             @param cmd - array of strings from command where cmd[0] = command name and all else are descriptors
+             @param pa
+             th - path to a file
+             @param flag - STDIN or STDOUT
+             @param mode - FOREGROUND or BACKGROUND
+             */
+        
+            returnValue = launchJob(tokens, filename , redirectType, mode);
+        }else{
+            cmdPtr++;
+        }
+    }
+  
+    return returnValue;
 }
